@@ -1,0 +1,3832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>The Agenda</title>
+  <style>
+    /* =========================================================================
+       THEME TOKENS — ZERO GREEN, ZERO ORANGE (Default: Obsidian & Brushed Bronze)
+       ========================================================================= */
+    :root {
+      --bg-obsidian: #090a0d;
+      --bg-surface: #111318;
+      --bg-elevated: #181b22;
+      --bg-hover: #20242e;
+      --border-subtle: #252934;
+      --border-strong: #373d4d;
+      --text-primary: #f1f3f7;
+      --text-secondary: #9ba3b4;
+      --text-muted: #646c7d;
+
+      --accent-primary: #b8894a;
+      --accent-bright: #d4a663;
+      --accent-soft: rgba(212, 166, 99, 0.14);
+      --accent-border: rgba(212, 166, 99, 0.38);
+
+      --secondary-accent: #8fa3bf;
+      --secondary-soft: rgba(143, 163, 191, 0.14);
+      --secondary-border: rgba(143, 163, 191, 0.35);
+
+      --work-accent: #5c6578;
+      --work-soft: rgba(92, 101, 120, 0.16);
+
+      --training-accent: #7ea8be;
+      --training-soft: rgba(126, 168, 190, 0.15);
+
+      --danger-color: #d9536f;
+      --danger-soft: rgba(217, 83, 111, 0.16);
+
+      --radius-xl: 20px;
+      --radius-lg: 15px;
+      --radius-md: 11px;
+      --radius-pill: 999px;
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.52);
+      --shadow-fab: 0 12px 30px rgba(0, 0, 0, 0.65);
+      --spring-ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-obsidian);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+    }
+
+    .app-shell {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 0 14px calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* =========================================================================
+       STICKY HEADER, STATUS BADGE & CONTROLS
+       ========================================================================= */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(9, 10, 13, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      margin: 0 -14px 16px;
+      padding: 13px 14px 12px;
+    }
+
+    .header-inner {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+    }
+
+    .brand-title {
+      margin: 2px 0 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .date-sub {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .header-right-tools {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      background: var(--secondary-soft);
+      border: 1px solid var(--secondary-border);
+      color: var(--secondary-accent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .health-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-bright);
+    }
+
+    .control-strip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .control-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 40px;
+      padding: 7px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .pill-btn:active {
+      transform: scale(0.96);
+    }
+
+    .pill-btn.is-primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-bright);
+      color: #0b0c0e;
+    }
+
+    .pill-btn.is-accent-soft {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+      color: var(--accent-bright);
+    }
+
+    .pill-btn.is-secondary-soft {
+      background: var(--secondary-soft);
+      border-color: var(--secondary-border);
+      color: var(--secondary-accent);
+    }
+
+    .pill-btn.is-danger-soft {
+      background: var(--danger-soft);
+      border-color: var(--danger-color);
+      color: #ff8fa3;
+    }
+
+    /* =========================================================================
+       LIVE 24-HOUR REMAINING COUNTER STRIP
+       ========================================================================= */
+    .countdown-strip {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .countdown-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .metric-box {
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 6px 8px;
+      min-width: 0;
+    }
+
+    .metric-kicker {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-bright);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-val.is-sec {
+      color: var(--secondary-accent);
+    }
+
+    .day-meter-track {
+      position: relative;
+      height: 8px;
+      width: 100%;
+      border-radius: var(--radius-pill);
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .day-meter-elapsed {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(90deg, var(--work-accent), var(--accent-bright));
+      transition: width 0.5s ease;
+    }
+
+    .countdown-next-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* =========================================================================
+       JARVIS VOICE COMMAND BAR & SETTINGS PANEL
+       ========================================================================= */
+    .jarvis-bar {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(24, 27, 34, 0.96) 0%, rgba(14, 16, 22, 0.98) 100%);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .jarvis-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .jarvis-identity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .voice-wave {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      height: 16px;
+    }
+
+    .voice-wave span {
+      width: 3px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--accent-bright);
+      transition: height 0.15s ease;
+    }
+
+    .jarvis-bar.is-speaking .voice-wave span {
+      animation: wavePulse 0.7s ease-in-out infinite;
+    }
+
+    .jarvis-bar.is-speaking .voice-wave span:nth-child(2) { animation-delay: 0.15s; }
+    .jarvis-bar.is-speaking .voice-wave span:nth-child(3) { animation-delay: 0.3s; }
+    .jarvis-bar.is-speaking .voice-wave span:nth-child(4) { animation-delay: 0.45s; }
+
+    .jarvis-bar.is-listening .voice-wave span {
+      background: var(--danger-color);
+      animation: wavePulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes wavePulse {
+      0%, 100% { height: 4px; }
+      50% { height: 15px; }
+    }
+
+    .jarvis-status-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .jarvis-btn-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .voice-settings-drawer {
+      display: none;
+      padding: 11px;
+      border-radius: var(--radius-md);
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .voice-settings-drawer.is-open {
+      display: flex;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 400px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .field-input, .field-select {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .field-input:focus, .field-select:focus {
+      outline: 2px solid var(--accent-bright);
+      outline-offset: 1px;
+    }
+
+    .range-input {
+      width: 100%;
+      accent-color: var(--accent-bright);
+      cursor: pointer;
+    }
+
+    .diag-readout {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 7px 9px;
+      line-height: 1.35;
+    }
+
+    /* Holographic HUD Embed Mode (?hud=1) for SolarpunkHub.html */
+    body.hud-embed-mode {
+      background: transparent !important;
+    }
+
+    body.hud-embed-mode .top-header {
+      background: rgba(9, 10, 13, 0.78);
+      border-bottom-color: var(--accent-border);
+    }
+
+    body.hud-embed-mode .app-shell {
+      max-width: 100%;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    body.hud-embed-mode .card {
+      background: rgba(17, 19, 24, 0.84);
+      backdrop-filter: blur(14px);
+      border-color: var(--accent-border);
+    }
+
+    /* =========================================================================
+       TOAST BANNER
+       ========================================================================= */
+    #toastBox {
+      display: none;
+      margin-top: 9px;
+      padding: 9px 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-bright);
+      font-size: 12px;
+      font-weight: 700;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    #toastBox.is-visible {
+      display: flex;
+    }
+
+    /* =========================================================================
+       COLLAPSIBLE ACCORDION CARDS
+       ========================================================================= */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 15px 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card.custody-card {
+      background: linear-gradient(155deg, #15171e 0%, #101217 65%, #191612 100%);
+      border-color: var(--border-strong);
+    }
+
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 36px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-right-cluster {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .chevron-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      transition: transform 0.28s var(--spring-ease);
+    }
+
+    .card.is-collapsed .chevron-icon {
+      transform: rotate(-90deg);
+    }
+
+    .accordion-collapse {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.3s var(--spring-ease);
+    }
+
+    .card.is-collapsed .accordion-collapse {
+      grid-template-rows: 0fr;
+    }
+
+    .accordion-inner {
+      overflow: hidden;
+    }
+
+    .accordion-content {
+      padding-top: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tag-accent {
+      background: var(--accent-soft);
+      color: var(--accent-bright);
+      border: 1px solid var(--accent-border);
+    }
+
+    .tag-secondary {
+      background: var(--secondary-soft);
+      color: var(--secondary-accent);
+      border: 1px solid var(--secondary-border);
+    }
+
+    .tag-steel {
+      background: var(--work-soft);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* =========================================================================
+       24-HOUR TACTICAL RADIAL CHRONOMETER & PROPORTIONAL CAPACITY BAR
+       ========================================================================= */
+    .graph-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .graph-legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 10.5px;
+      color: var(--text-secondary);
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 3px;
+    }
+
+    .preset-strip {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .preset-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chrono-shell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .radial-stage {
+      position: relative;
+      width: 100%;
+      max-width: 310px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px auto 0;
+    }
+
+    .radial-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.55));
+    }
+
+    .chrono-arc {
+      fill: none;
+      stroke-linecap: butt;
+      cursor: pointer;
+      transition: stroke-width 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+    }
+
+    .chrono-arc:hover,
+    .chrono-arc.is-selected {
+      stroke-width: 25 !important;
+      filter: brightness(1.18);
+    }
+
+    .radial-hud-core {
+      position: absolute;
+      width: 56%;
+      height: 56%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 35%, var(--bg-elevated) 0%, var(--bg-obsidian) 100%);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+      box-shadow: inset 0 2px 14px rgba(0, 0, 0, 0.65);
+      pointer-events: none;
+    }
+
+    .core-kicker {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+    }
+
+    .core-main-val {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-top: 2px;
+    }
+
+    .core-sub-val {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .inspector-banner {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 52px;
+    }
+
+    .inspector-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .inspector-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .capacity-strip-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .capacity-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 0 2px;
+    }
+
+    .capacity-bar-track {
+      position: relative;
+      width: 100%;
+      height: 24px;
+      border-radius: 10px;
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-strong);
+      overflow: hidden;
+    }
+
+    .cap-seg {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.15s ease;
+    }
+
+    .cap-seg:hover,
+    .cap-seg.is-selected {
+      filter: brightness(1.22);
+      z-index: 4;
+      outline: 1.5px solid var(--text-primary);
+    }
+
+    .cap-now-laser {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #ffffff;
+      box-shadow: 0 0 8px var(--accent-bright), 0 0 4px #ffffff;
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .capacity-stats-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    @media (max-width: 400px) {
+      .capacity-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .cap-stat-pill {
+      padding: 7px 8px;
+      border-radius: var(--radius-md);
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .cap-stat-label {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cap-stat-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+
+    /* =========================================================================
+       SWIPEABLE DAY CAROUSEL & TIMELINE BLOCKS
+       ========================================================================= */
+    .day-pills {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .day-tab {
+      min-height: 46px;
+      padding: 6px 2px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-obsidian);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .day-tab.is-active {
+      background: var(--accent-primary);
+      border-color: var(--accent-bright);
+      color: #0b0c0e;
+    }
+
+    .day-tab .custody-pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-bright);
+    }
+
+    .day-tab.is-active .custody-pip {
+      background: #0b0c0e;
+    }
+
+    .carousel-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .swipe-viewport {
+      position: relative;
+      overflow: hidden;
+      touch-action: pan-y;
+      border-radius: var(--radius-lg);
+    }
+
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @keyframes slideInFromRight {
+      from { opacity: 0.3; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInFromLeft {
+      from { opacity: 0.3; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .anim-slide-next { animation: slideInFromRight 0.28s var(--spring-ease); }
+    .anim-slide-prev { animation: slideInFromLeft 0.28s var(--spring-ease); }
+
+    .time-block {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-elevated);
+      border-left: 3px solid var(--border-strong);
+    }
+
+    .time-block.type-work {
+      border-left-color: var(--work-accent);
+      background: rgba(24, 27, 34, 0.72);
+    }
+
+    .time-block.type-custody {
+      border-left-color: var(--accent-bright);
+      background: var(--accent-soft);
+    }
+
+    .time-block.type-open {
+      border-left-color: var(--secondary-accent);
+      background: var(--secondary-soft);
+    }
+
+    .time-stamp {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .time-block.type-custody .time-stamp { color: var(--accent-bright); }
+    .time-block.type-open .time-stamp { color: var(--secondary-accent); }
+
+    .block-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .block-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 2px 0 0;
+    }
+
+    .full-week-day-group {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .full-week-day-group:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* =========================================================================
+       WORKOUTS, FOCUS TIMER & SWIPEABLE CHECKLIST ROWS
+       ========================================================================= */
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      margin: 4px 0 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-bright));
+      border-radius: var(--radius-pill);
+      transition: width 0.3s var(--spring-ease);
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 440px) {
+      .quick-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .preset-card {
+      text-align: left;
+      padding: 11px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      cursor: pointer;
+      touch-action: manipulation;
+      min-height: 54px;
+    }
+
+    .preset-card:active {
+      transform: scale(0.97);
+    }
+
+    .preset-name {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--accent-bright);
+    }
+
+    .preset-desc {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .log-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .log-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-bright);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-obsidian);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 12px;
+    }
+
+    .timer-display {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent-bright);
+      letter-spacing: 0.04em;
+    }
+
+    .inline-add-row {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    .swipe-item-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      margin-bottom: 8px;
+      background: var(--accent-soft);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .swipe-item-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--accent-bright);
+      pointer-events: none;
+    }
+
+    .check-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      touch-action: pan-y;
+    }
+
+    .check-row.is-done {
+      background: #14171f;
+    }
+
+    .check-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .tactical-checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid var(--accent-primary);
+      background: var(--bg-obsidian);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: #0b0c0e;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .check-row.is-done .tactical-checkbox {
+      background: var(--accent-bright);
+      border-color: var(--accent-bright);
+    }
+
+    .check-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .check-row.is-done .check-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .check-meta {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .icon-btn-sm {
+      min-height: 36px;
+      min-width: 36px;
+      padding: 4px 10px;
+      border-radius: 9px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-obsidian);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    /* =========================================================================
+       FLOATING QUICK-ADD (+) & MODALS
+       ========================================================================= */
+    .fab-btn {
+      position: fixed;
+      right: 18px;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+      z-index: 60;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 1px solid var(--accent-bright);
+      background: linear-gradient(135deg, var(--accent-bright) 0%, var(--accent-primary) 100%);
+      color: #0b0c0e;
+      font-size: 30px;
+      font-weight: 600;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-fab);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .fab-btn:active {
+      transform: scale(0.93);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4, 5, 7, 0.84);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.is-open {
+      display: flex;
+    }
+
+    @media (min-width: 560px) {
+      .modal-backdrop {
+        align-items: center;
+        padding: 16px;
+      }
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 24px 24px 0 0;
+      padding: 18px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 560px) {
+      .modal-panel {
+        border-radius: 24px;
+      }
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-obsidian);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .theme-option.is-selected {
+      border-color: var(--accent-bright);
+      background: var(--bg-elevated);
+    }
+
+    .theme-swatches {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .theme-swatch-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =======================================================================
+       STICKY HEADER & JARVIS VOICE COMMAND BAR
+       ======================================================================= -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="header-row">
+        <div>
+          <div id="brandKicker" class="brand-kicker">THE AGENDA // OBSIDIAN &amp; BRONZE</div>
+          <h1 class="brand-title">The Agenda</h1>
+          <p id="todayDateSub" class="date-sub">Loading schedule...</p>
+        </div>
+
+        <div class="header-right-tools">
+          <span id="jsHealthBadge" class="health-pill" title="JavaScript Engine Status">
+            <span class="health-dot"></span>
+            <span id="jsHealthText">BOOTING...</span>
+          </span>
+          <button type="button" class="pill-btn is-accent-soft" data-action="export-ics" style="min-height:34px;padding:4px 10px;font-size:11px;">
+            🔔 School Alerts (.ics)
+          </button>
+        </div>
+      </div>
+
+      <!-- Primary Mode Controls -->
+      <div class="control-strip">
+        <button type="button" class="pill-btn is-primary" data-action="toggle-week">
+          <span id="weekCycleLabel">Week A: Wed 6p – Sat 8p</span>
+        </button>
+
+        <button type="button" class="pill-btn is-secondary-soft" data-action="toggle-peak">
+          <span id="peakShiftLabel">Peak: Sun–Wed 6:30p + Thu 9–2:30</span>
+        </button>
+
+        <button type="button" class="pill-btn" data-action="open-theme-modal">
+          🎨 Theme &amp; Reset
+        </button>
+
+        <button type="button" class="pill-btn" data-action="toggle-hud">
+          🧊 HUD Mode
+        </button>
+      </div>
+
+      <!-- Live 24-Hour Daylight & Open Hours Countdown Strip -->
+      <div class="countdown-strip" aria-label="24-Hour Time Remaining Counter">
+        <div class="countdown-metrics">
+          <div class="metric-box">
+            <div class="metric-kicker">Day Left (to 12a)</div>
+            <div id="dayHoursLeftVal" class="metric-val">--h --m</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-kicker">Open Free Time</div>
+            <div id="openHoursLeftVal" class="metric-val is-sec">--h --m</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-kicker">Day Elapsed</div>
+            <div id="dayPctElapsedVal" class="metric-val">0%</div>
+          </div>
+        </div>
+        <div class="day-meter-track">
+          <div id="dayMeterElapsedBar" class="day-meter-elapsed" style="width: 0%;"></div>
+        </div>
+        <div class="countdown-next-line">
+          <span id="nextBlockCountdownTxt" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Calculating next window...</span>
+          <span id="liveClockTxt" style="font-family:var(--font-mono);font-weight:700;color:var(--text-primary);flex-shrink:0;">--:--</span>
+        </div>
+      </div>
+
+      <!-- JARVIS Voice Briefing & Hands-Free Command Bar -->
+      <div id="jarvisBar" class="jarvis-bar" aria-label="JARVIS Voice Engine">
+        <div class="jarvis-top-row">
+          <div class="jarvis-identity">
+            <div class="voice-wave" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <span id="jarvisStatusText" class="jarvis-status-text">JARVIS VOICE // STANDBY</span>
+          </div>
+
+          <div class="jarvis-btn-row">
+            <button type="button" class="pill-btn is-primary" data-action="brief-me" style="min-height:36px;padding:4px 11px;">
+              🎙️ Brief Me
+            </button>
+            <button type="button" class="pill-btn is-accent-soft" data-action="test-audio" style="min-height:36px;padding:4px 10px;">
+              🔊 Test Audio
+            </button>
+            <button type="button" class="pill-btn is-danger-soft" data-action="stop-audio" style="min-height:36px;padding:4px 10px;">
+              ⏹️ Stop
+            </button>
+            <button id="jarvisListenBtn" type="button" class="pill-btn is-secondary-soft" data-action="toggle-listen" style="min-height:36px;padding:4px 10px;">
+              🎤 Listen
+            </button>
+            <button id="jarvisCheckInsBtn" type="button" class="pill-btn is-accent-soft" data-action="toggle-checkins" style="min-height:36px;padding:4px 10px;">
+              🔔 Check-Ins: ON
+            </button>
+            <button type="button" class="pill-btn" data-action="toggle-voice-settings" style="min-height:36px;padding:4px 10px;">
+              🎛️ Voice Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- Collapsible Voice Settings Drawer -->
+        <div id="voiceSettingsDrawer" class="voice-settings-drawer">
+          <div class="grid-2">
+            <div>
+              <label class="field-label" for="voiceProviderSelect">Voice Provider</label>
+              <select id="voiceProviderSelect" class="field-select" data-change="voice-provider">
+                <option value="browser">Browser Speech (Free - Built-In)</option>
+                <option value="openai">OpenAI TTS (Neural)</option>
+                <option value="elevenlabs">ElevenLabs (Neural)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="field-label" for="browserVoiceSelect">System Voice</label>
+              <select id="browserVoiceSelect" class="field-select" data-change="browser-voice">
+                <option value="">System Default (Auto)</option>
+              </select>
+            </div>
+          </div>
+
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;">
+            <input id="ukFilterCheckbox" type="checkbox" data-change="uk-filter" style="accent-color:var(--accent-bright);width:16px;height:16px;" />
+            <span>Highlight / Filter UK &amp; Natural voices only (uncheck to show all phone voices)</span>
+          </label>
+
+          <div class="grid-2">
+            <div>
+              <label class="field-label" for="voiceRateSlider">Rate: <span id="voiceRateLabel">0.95x</span></label>
+              <input id="voiceRateSlider" class="range-input" type="range" min="0.70" max="1.30" step="0.01" value="0.95" data-input="voice-rate" />
+            </div>
+            <div>
+              <label class="field-label" for="voicePitchSlider">Pitch: <span id="voicePitchLabel">0.90</span></label>
+              <input id="voicePitchSlider" class="range-input" type="range" min="0.70" max="1.20" step="0.01" value="0.90" data-input="voice-pitch" />
+            </div>
+          </div>
+
+          <!-- Optional Neural API Config (Stored strictly in localStorage: keith_jarvis_neural_cfg) -->
+          <div id="neuralApiSection" style="display:none;flex-direction:column;gap:8px;border-top:1px solid var(--border-subtle);padding-top:9px;">
+            <div style="font-size:11px;color:var(--accent-bright);">
+              Stored locally in <code>localStorage</code> only. Automatically falls back to Browser Speech if no API key is entered or if offline.
+            </div>
+            <div class="grid-2">
+              <div>
+                <label class="field-label" for="neuralApiKeyInput">API Key</label>
+                <input id="neuralApiKeyInput" class="field-input" type="password" autocomplete="off" placeholder="sk-... or xi-..." />
+              </div>
+              <div>
+                <label class="field-label" for="neuralVoiceIdInput">Voice Name / ID</label>
+                <input id="neuralVoiceIdInput" class="field-input" type="text" placeholder="onyx (OpenAI) or Voice ID" />
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="pill-btn is-primary" data-action="save-neural-cfg" style="min-height:36px;padding:4px 12px;">
+                Save Neural Config
+              </button>
+              <button type="button" class="pill-btn is-secondary-soft" data-action="test-neural-voice" style="min-height:36px;padding:4px 12px;">
+                Test Neural Voice
+              </button>
+            </div>
+          </div>
+
+          <div id="voiceDiagBox" class="diag-readout">
+            Engine: Browser Speech (Free) • Active: System Default • Rate 0.95x / Pitch 0.90
+          </div>
+        </div>
+      </div>
+
+      <div id="toastBox" role="status" aria-live="polite">
+        <span id="toastMsg"></span>
+        <button type="button" class="icon-btn-sm" data-action="hide-toast">OK</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+
+    <!-- =====================================================================
+         1. 24-HOUR TACTICAL RADIAL CHRONOMETER & CAPACITY BAR
+         ===================================================================== -->
+    <section id="sec-graph24" class="card" aria-label="24-Hour Radial Chronometer">
+      <div class="accordion-header" data-action="toggle-accordion" data-key="graph24">
+        <h2 class="card-title">
+          <span>🎯</span>
+          <span id="graph24Heading">24-Hour Radial Chronometer</span>
+        </h2>
+        <div class="header-right-cluster">
+          <span id="graph24SummaryTag" class="tag tag-secondary">24h Ring</span>
+          <span class="chevron-icon" aria-hidden="true">▼</span>
+        </div>
+      </div>
+
+      <div class="accordion-collapse">
+        <div class="accordion-inner">
+          <div class="accordion-content">
+            <div class="graph-toolbar">
+              <div class="graph-legend">
+                <span class="legend-chip"><span class="legend-dot" style="background:var(--work-accent);"></span>Work</span>
+                <span class="legend-chip"><span class="legend-dot" style="background:var(--accent-bright);"></span>Custody / Runs</span>
+                <span class="legend-chip"><span class="legend-dot" style="background:var(--training-accent);"></span>Training</span>
+                <span class="legend-chip"><span class="legend-dot" style="background:var(--secondary-accent);"></span>Tasks / Custom</span>
+              </div>
+              <button type="button" class="pill-btn is-accent-soft" data-action="open-timeblock-modal" style="min-height:32px;padding:3px 10px;font-size:11px;">
+                + Time-Block Task
+              </button>
+            </div>
+
+            <!-- Quick 1-Tap Time-Block Presets for Selected Day -->
+            <div class="preset-strip" aria-label="Quick Time-Block Presets">
+              <button type="button" class="icon-btn-sm" data-action="preset-block" data-title="Workout Session" data-dur="60" data-cat="Workout" style="white-space:nowrap;font-size:11px;">+ Workout (1h)</button>
+              <button type="button" class="icon-btn-sm" data-action="preset-block" data-title="OSHA Study Module" data-dur="90" data-cat="OSHA" style="white-space:nowrap;font-size:11px;">+ OSHA (1.5h)</button>
+              <button type="button" class="icon-btn-sm" data-action="preset-block" data-title="Web Build Sprint" data-dur="120" data-cat="Web Build" style="white-space:nowrap;font-size:11px;">+ Web Build (2h)</button>
+              <button type="button" class="icon-btn-sm" data-action="preset-block" data-title="Plant Care Check" data-dur="45" data-cat="Personal" style="white-space:nowrap;font-size:11px;">+ Plants (45m)</button>
+            </div>
+
+            <div class="chrono-shell" style="margin-top:10px;">
+              <!-- 24-Hour Orbital Ring SVG -->
+              <div id="radialChronoStage" class="radial-stage"></div>
+
+              <!-- Tap-to-Inspect Segment Readout -->
+              <div id="chronoInspectorBox" class="inspector-banner">
+                <div>
+                  <p class="inspector-title">Tap any arc on the 24h ring or bar to inspect</p>
+                  <div class="inspector-meta">00:00 Top • 06:00 Right • 12:00 Bottom • 18:00 Left</div>
+                </div>
+              </div>
+
+              <!-- Horizontal 24-Hour Proportional Capacity Strip -->
+              <div class="capacity-strip-wrap">
+                <div class="capacity-ticks">
+                  <span>00h</span>
+                  <span>04h</span>
+                  <span>08h</span>
+                  <span>12h</span>
+                  <span>16h</span>
+                  <span>20h</span>
+                  <span>24h</span>
+                </div>
+                <div id="capacityBarTrack" class="capacity-bar-track"></div>
+              </div>
+
+              <!-- Category Hours Breakdown -->
+              <div id="capacityStatsGrid" class="capacity-stats-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         2. WEEKLY CUSTODY & WINDOWS (SWIPEABLE DAY CAROUSEL)
+         ===================================================================== -->
+    <section id="sec-schedule" class="card custody-card" aria-label="Weekly Custody and Windows">
+      <div class="accordion-header" data-action="toggle-accordion" data-key="schedule">
+        <h2 class="card-title">
+          <span>🗓️</span>
+          <span>Weekly Custody &amp; Windows</span>
+        </h2>
+        <div class="header-right-cluster">
+          <span id="scheduleBadgeTag" class="tag tag-accent">Week A</span>
+          <span class="chevron-icon" aria-hidden="true">▼</span>
+        </div>
+      </div>
+
+      <div class="accordion-collapse">
+        <div class="accordion-inner">
+          <div class="accordion-content">
+            <div id="dayPillsBar" class="day-pills"></div>
+
+            <div class="carousel-toolbar">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button type="button" class="icon-btn-sm" data-action="prev-day" style="min-height:30px;padding:2px 9px;">◀</button>
+                <span id="carouselDayLabel" style="font-weight:700;color:var(--text-primary);">Selected Day</span>
+                <button type="button" class="icon-btn-sm" data-action="next-day" style="min-height:30px;padding:2px 9px;">▶</button>
+              </div>
+              <button id="fullWeekToggleBtn" type="button" class="icon-btn-sm" data-action="toggle-full-week" style="min-height:30px;font-size:11px;">
+                Full Week View
+              </button>
+            </div>
+
+            <div id="scheduleSwipeViewport" class="swipe-viewport">
+              <div id="dayScheduleContainer" class="timeline-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         3. 3+ DAYS/WEEK WORKOUT TRACKER
+         ===================================================================== -->
+    <section id="sec-workouts" class="card" aria-label="Workout Tracker">
+      <div class="accordion-header" data-action="toggle-accordion" data-key="workouts">
+        <h2 class="card-title"><span>💪</span> Training (3+ Days / Week)</h2>
+        <div class="header-right-cluster">
+          <span id="workoutGoalTag" class="tag tag-accent">0 / 3 This Week</span>
+          <span class="chevron-icon" aria-hidden="true">▼</span>
+        </div>
+      </div>
+
+      <div class="accordion-collapse">
+        <div class="accordion-inner">
+          <div class="accordion-content">
+            <div class="progress-track">
+              <div id="workoutProgressBar" class="progress-fill" style="width: 0%;"></div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+              <p id="workoutWindowHint" style="margin:0;font-size:12px;color:var(--text-secondary);flex:1;">
+                Open windows: Thu 2:30–3:30 PM or early mornings before 7:00 AM.
+              </p>
+              <div style="display:flex;gap:6px;">
+                <button type="button" class="icon-btn-sm" data-action="undo-workout" style="min-height:30px;font-size:11px;">Undo</button>
+                <button type="button" class="icon-btn-sm" data-action="reset-workouts" style="min-height:30px;font-size:11px;">Reset</button>
+              </div>
+            </div>
+
+            <div class="quick-grid">
+              <button type="button" class="preset-card" data-action="log-workout" data-label="Push / Chest">
+                <span class="preset-name">+ Push / Chest</span>
+                <span class="preset-desc">Dips, push-ups &amp; presses</span>
+              </button>
+              <button type="button" class="preset-card" data-action="log-workout" data-label="Pull / Back">
+                <span class="preset-name">+ Pull / Back</span>
+                <span class="preset-desc">Pull-ups, rows &amp; rear delts</span>
+              </button>
+              <button type="button" class="preset-card" data-action="log-workout" data-label="Legs & Core">
+                <span class="preset-name">+ Legs &amp; Core</span>
+                <span class="preset-desc">Squats, lunges &amp; core</span>
+              </button>
+            </div>
+
+            <div id="workoutLogChips" class="log-chip-row"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         4. OSHA CLASS MATERIAL & WEB BUILDING STUDIO + FOCUS TIMER
+         ===================================================================== -->
+    <section id="sec-projects" class="card" aria-label="OSHA Class and Web Building">
+      <div class="accordion-header" data-action="toggle-accordion" data-key="projects">
+        <h2 class="card-title"><span>🛠️</span> OSHA Material &amp; Web Building</h2>
+        <div class="header-right-cluster">
+          <span id="focusLoggedTag" class="tag tag-secondary">0 min logged</span>
+          <span class="chevron-icon" aria-hidden="true">▼</span>
+        </div>
+      </div>
+
+      <div class="accordion-collapse">
+        <div class="accordion-inner">
+          <div class="accordion-content">
+            <div class="timer-box">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;">
+                  Focus Timer
+                </div>
+                <div id="focusTimerDisplay" class="timer-display">25:00</div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="pill-btn" data-action="set-timer" data-mins="25" style="min-height:36px;padding:4px 10px;">25m</button>
+                <button type="button" class="pill-btn" data-action="set-timer" data-mins="45" style="min-height:36px;padding:4px 10px;">45m</button>
+                <button id="timerStartPauseBtn" type="button" class="pill-btn is-primary" data-action="toggle-timer" style="min-height:36px;padding:4px 12px;">Start</button>
+                <button type="button" class="pill-btn" data-action="reset-timer" style="min-height:36px;padding:4px 10px;">Reset</button>
+              </div>
+            </div>
+
+            <div class="inline-add-row">
+              <input id="inlineProjectInput" class="field-input" type="text" placeholder="Add OSHA module or web build task..." style="min-height:38px;" />
+              <button type="button" class="pill-btn is-accent-soft" data-action="inline-add-project" style="min-height:38px;padding:4px 12px;">Add</button>
+            </div>
+
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+              Tap or swipe right on any item to complete
+            </div>
+            <div id="projectsTaskList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         5. SATURDAY PLANT WATERING RITUAL
+         ===================================================================== -->
+    <section id="sec-plants" class="card" aria-label="Saturday Plant Watering">
+      <div class="accordion-header" data-action="toggle-accordion" data-key="plants">
+        <h2 class="card-title"><span>🌿</span> Saturday Plant Watering</h2>
+        <div class="header-right-cluster">
+          <span id="plantsCountTag" class="tag tag-steel">0 / 7</span>
+          <span class="chevron-icon" aria-hidden="true">▼</span>
+        </div>
+      </div>
+
+      <div class="accordion-collapse">
+        <div class="accordion-inner">
+          <div class="accordion-content">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+              <p style="margin:0;font-size:12px;color:var(--text-secondary);">
+                Saturday plant care checklist — tap or swipe right to check off.
+              </p>
+              <button type="button" class="icon-btn-sm" data-action="reset-plants" style="min-height:30px;font-size:11px;">Reset All</button>
+            </div>
+
+            <div id="plantChecklistContainer"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         6. KIDS & PERSONAL CHECKLIST
+         ===================================================================== -->
+    <section id="sec-errands" class="card" aria-label="Kids and Personal Checklist">
+      <div class="accordion-header" data-action="toggle-accordion" data-key="errands">
+        <h2 class="card-title"><span>🎒</span> Kids &amp; Personal Checklist</h2>
+        <div class="header-right-cluster">
+          <span id="errandsCountTag" class="tag tag-accent">0 open</span>
+          <span class="chevron-icon" aria-hidden="true">▼</span>
+        </div>
+      </div>
+
+      <div class="accordion-collapse">
+        <div class="accordion-inner">
+          <div class="accordion-content">
+            <div id="errandsListContainer"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Quick-Add (+) Button -->
+  <button type="button" class="fab-btn" data-action="open-quick-add" aria-label="Quick Add Item">+</button>
+
+  <!-- =======================================================================
+       MODAL 1: QUICK ADD ITEM
+       ======================================================================= -->
+  <div id="quickAddModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Quick Add" data-action="backdrop-close-qa">
+    <div class="modal-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="margin:0;font-size:18px;font-weight:800;">Quick Add</h3>
+        <button type="button" class="icon-btn-sm" data-action="close-quick-add">Close</button>
+      </div>
+
+      <form id="quickAddForm">
+        <label class="field-label" for="qaDomain">Category</label>
+        <select id="qaDomain" class="field-select" data-change="qa-domain" style="margin-bottom:10px;">
+          <option value="timeblock">24-Hour Schedule Time-Block</option>
+          <option value="projects">OSHA Class / Web Building</option>
+          <option value="errands">Kids / Personal Task</option>
+          <option value="workout">Log Custom Workout</option>
+          <option value="plants">Saturday Plant Care Item</option>
+        </select>
+
+        <label class="field-label" for="qaTitle">Title / Description *</label>
+        <input id="qaTitle" class="field-input" type="text" required placeholder="e.g., OSHA 30 Module 4 or Push / Chest Lift" style="margin-bottom:10px;" />
+
+        <div id="qaTimeBlockFields" class="grid-2" style="margin-bottom:10px;">
+          <div>
+            <label class="field-label" for="qaDaySelect">Day</label>
+            <select id="qaDaySelect" class="field-select">
+              <option value="0">Sunday</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="qaStartTime">Start Time</label>
+            <input id="qaStartTime" class="field-input" type="time" value="18:30" />
+          </div>
+          <div>
+            <label class="field-label" for="qaDurationMins">Duration</label>
+            <select id="qaDurationMins" class="field-select">
+              <option value="30">30 mins</option>
+              <option value="45">45 mins</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">1.5 hours</option>
+              <option value="120">2 hours</option>
+              <option value="180">3 hours</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="qaTrackCat">Block Tag</label>
+            <select id="qaTrackCat" class="field-select">
+              <option value="Workout">Workout</option>
+              <option value="OSHA">OSHA Class</option>
+              <option value="Web Build">Web Build</option>
+              <option value="Kids">Kids</option>
+              <option value="Personal">Personal</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="field-label" for="qaSub">Track / Notes (Optional)</label>
+        <input id="qaSub" class="field-input" type="text" placeholder="e.g., Thu 2:30 PM window" style="margin-bottom:14px;" />
+
+        <button type="submit" class="pill-btn is-primary" style="width:100%;min-height:46px;font-size:14px;">
+          Save to The Agenda
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODAL 2: DARK THEME PRESETS & WEEKLY RESET
+       ======================================================================= -->
+  <div id="themeSettingsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Theme and Reset" data-action="backdrop-close-theme">
+    <div class="modal-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="margin:0;font-size:18px;font-weight:800;">Dark Minimalist Palette &amp; Reset</h3>
+        <button type="button" class="icon-btn-sm" data-action="close-theme-modal">Done</button>
+      </div>
+
+      <span class="field-label">Select Dark Theme (Zero Green / Zero Orange)</span>
+      <div id="themeOptionsList" class="theme-grid">
+        <button type="button" class="theme-option" data-action="set-theme" data-theme="obsidian_bronze">
+          <span>Obsidian &amp; Brushed Bronze</span>
+          <span class="theme-swatches">
+            <span class="theme-swatch-dot" style="background:#090a0d;"></span>
+            <span class="theme-swatch-dot" style="background:#d4a663;"></span>
+            <span class="theme-swatch-dot" style="background:#8fa3bf;"></span>
+          </span>
+        </button>
+
+        <button type="button" class="theme-option" data-action="set-theme" data-theme="stealth_steel">
+          <span>Stealth Steel &amp; Ice</span>
+          <span class="theme-swatches">
+            <span class="theme-swatch-dot" style="background:#080b10;"></span>
+            <span class="theme-swatch-dot" style="background:#7dd3fc;"></span>
+            <span class="theme-swatch-dot" style="background:#94a3b8;"></span>
+          </span>
+        </button>
+
+        <button type="button" class="theme-option" data-action="set-theme" data-theme="carbon_crimson">
+          <span>Carbon &amp; Titanium Crimson</span>
+          <span class="theme-swatches">
+            <span class="theme-swatch-dot" style="background:#0b090a;"></span>
+            <span class="theme-swatch-dot" style="background:#fb7185;"></span>
+            <span class="theme-swatch-dot" style="background:#a1a1aa;"></span>
+          </span>
+        </button>
+      </div>
+
+      <div style="border-top:1px solid var(--border-subtle);padding-top:14px;display:flex;flex-direction:column;gap:8px;">
+        <button type="button" class="pill-btn is-primary" data-action="start-new-week" style="width:100%;">
+          Start New Week (Flip A/B Custody &amp; Reset Weekly Counters)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var STORAGE_KEY = 'keith_agenda_ops_v4';
+      var NEURAL_STORAGE_KEY = 'keith_jarvis_neural_cfg';
+      var ANCHOR_WEEK_A_SUNDAY = new Date(2026, 10, 22, 0, 0, 0);
+      var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var FULL_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      var DARK_THEMES = {
+        obsidian_bronze: {
+          kicker: 'THE AGENDA // OBSIDIAN & BRONZE',
+          vars: {
+            '--bg-obsidian': '#090a0d',
+            '--bg-surface': '#111318',
+            '--bg-elevated': '#181b22',
+            '--bg-hover': '#20242e',
+            '--border-subtle': '#252934',
+            '--border-strong': '#373d4d',
+            '--accent-primary': '#b8894a',
+            '--accent-bright': '#d4a663',
+            '--accent-soft': 'rgba(212, 166, 99, 0.14)',
+            '--accent-border': 'rgba(212, 166, 99, 0.38)',
+            '--secondary-accent': '#8fa3bf',
+            '--secondary-soft': 'rgba(143, 163, 191, 0.14)',
+            '--secondary-border': 'rgba(143, 163, 191, 0.35)',
+            '--training-accent': '#7ea8be'
+          }
+        },
+        stealth_steel: {
+          kicker: 'THE AGENDA // STEALTH STEEL & ICE',
+          vars: {
+            '--bg-obsidian': '#080b10',
+            '--bg-surface': '#0f141d',
+            '--bg-elevated': '#161d29',
+            '--bg-hover': '#1e2736',
+            '--border-subtle': '#222c3d',
+            '--border-strong': '#334155',
+            '--accent-primary': '#38bdf8',
+            '--accent-bright': '#7dd3fc',
+            '--accent-soft': 'rgba(125, 211, 252, 0.14)',
+            '--accent-border': 'rgba(125, 211, 252, 0.38)',
+            '--secondary-accent': '#cbd5e1',
+            '--secondary-soft': 'rgba(203, 213, 225, 0.12)',
+            '--secondary-border': 'rgba(203, 213, 225, 0.32)',
+            '--training-accent': '#93c5fd'
+          }
+        },
+        carbon_crimson: {
+          kicker: 'THE AGENDA // CARBON & TITANIUM CRIMSON',
+          vars: {
+            '--bg-obsidian': '#0b090a',
+            '--bg-surface': '#141113',
+            '--bg-elevated': '#1c181b',
+            '--bg-hover': '#262024',
+            '--border-subtle': '#2c2529',
+            '--border-strong': '#42373d',
+            '--accent-primary': '#be123c',
+            '--accent-bright': '#fb7185',
+            '--accent-soft': 'rgba(251, 113, 133, 0.14)',
+            '--accent-border': 'rgba(251, 113, 133, 0.38)',
+            '--secondary-accent': '#a1a1aa',
+            '--secondary-soft': 'rgba(161, 161, 170, 0.14)',
+            '--secondary-border': 'rgba(161, 161, 170, 0.34)',
+            '--training-accent': '#e2e8f0'
+          }
+        }
+      };
+
+      function computeAutoWeekType(refDate) {
+        var d = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
+        if (d.getFullYear() === 2026 && d.getMonth() === 10 && d.getDate() === 21) return 'A';
+        var diffMs = d.getTime() - ANCHOR_WEEK_A_SUNDAY.getTime();
+        var diffWeeks = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+        return Math.abs(diffWeeks) % 2 === 0 ? 'A' : 'B';
+      }
+
+      function getDefaultState() {
+        var now = new Date();
+        return {
+          themeKey: 'obsidian_bronze',
+          weekType: computeAutoWeekType(now),
+          peakSeason: true,
+          selectedDayIndex: now.getDay(),
+          fullWeekView: false,
+          hudEmbedMode: window.location.search.indexOf('hud=1') !== -1,
+          voiceCheckIns: true,
+          voiceProvider: 'browser',
+          preferredVoiceURI: '',
+          ukFilterOnly: false,
+          voiceRate: 0.95,
+          voicePitch: 0.90,
+          collapsedSections: {
+            graph24: false,
+            schedule: false,
+            workouts: false,
+            projects: false,
+            plants: false,
+            errands: false
+          },
+          customTimeBlocks: [
+            { id: 'tb-1', dayIdx: 4, startMins: 14 * 60 + 30, durationMins: 60, title: 'Workout Sprint (Thu Window)', category: 'Workout' },
+            { id: 'tb-2', dayIdx: 1, startMins: 19 * 60, durationMins: 90, title: 'OSHA Class & Web Build Sprint', category: 'OSHA' }
+          ],
+          workouts: [],
+          focusMinutesLogged: 0,
+          projects: [
+            { id: 'proj-1', title: 'OSHA Class Material — Outline & Slide Deck Build', track: 'OSHA Class', done: false },
+            { id: 'proj-2', title: 'Web Building — Next Feature / Layout Sprint', track: 'Web Building', done: false },
+            { id: 'proj-3', title: 'Review OSHA Compliance Case Studies & Quiz Prompts', track: 'OSHA Class', done: false }
+          ],
+          plants: [
+            { id: 'pl-1', name: 'Monstera (check soil & mist leaves)', done: false },
+            { id: 'pl-2', name: 'Pothos (water & trim trailing vines)', done: false },
+            { id: 'pl-3', name: 'Philodendron (check moisture & wipe foliage)', done: false },
+            { id: 'pl-4', name: 'Hoya (water lightly & inspect vines)', done: false },
+            { id: 'pl-5', name: 'Orchids (soak bark / mist roots)', done: false },
+            { id: 'pl-6', name: 'Propagation Station (refresh water vessels)', done: false },
+            { id: 'pl-7', name: 'Humidifier Check (refill tank & verify output)', done: false }
+          ],
+          errands: [
+            { id: 'err-1', title: 'Pack kids’ school bags & set 7:30a / 8:30a alarms', tag: 'Kids', done: false },
+            { id: 'err-2', title: 'Meal prep for Sun–Wed work block', tag: 'Personal', done: false }
+          ]
+        };
+      }
+
+      function loadState() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return getDefaultState();
+          var parsed = JSON.parse(raw);
+          var base = getDefaultState();
+          return Object.assign(base, parsed, {
+            collapsedSections: Object.assign(base.collapsedSections, parsed.collapsedSections || {}),
+            customTimeBlocks: Array.isArray(parsed.customTimeBlocks) ? parsed.customTimeBlocks : base.customTimeBlocks
+          });
+        } catch (e) {
+          return getDefaultState();
+        }
+      }
+
+      function loadNeuralCfg() {
+        try {
+          var raw = localStorage.getItem(NEURAL_STORAGE_KEY);
+          if (!raw) return { apiKey: '', voiceId: 'onyx' };
+          var p = JSON.parse(raw);
+          return { apiKey: p.apiKey || '', voiceId: p.voiceId || 'onyx' };
+        } catch (e) {
+          return { apiKey: '', voiceId: 'onyx' };
+        }
+      }
+
+      var state = loadState();
+      var neuralCfg = loadNeuralCfg();
+      var timerSeconds = 25 * 60;
+      var timerSelectedMins = 25;
+      var timerInterval = null;
+      var lastSlideDirection = null;
+      var selectedBlockId = null;
+      var activeAudioEl = null;
+      var recognition = null;
+      var isListening = false;
+      var lastAudioDiag = 'Ready';
+      var lastAnnouncedMilestone = '';
+      var SpeechRecCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      function saveNeuralCfg() {
+        try {
+          localStorage.setItem(NEURAL_STORAGE_KEY, JSON.stringify(neuralCfg));
+        } catch (e) {}
+      }
+
+      function byId(id) {
+        return document.getElementById(id);
+      }
+
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function showToast(msg) {
+        try {
+          var box = byId('toastBox');
+          var txt = byId('toastMsg');
+          if (box && txt) {
+            txt.textContent = msg;
+            box.classList.add('is-visible');
+          }
+        } catch (e) {}
+      }
+
+      function hideToast() {
+        try {
+          var box = byId('toastBox');
+          if (box) box.classList.remove('is-visible');
+        } catch (e) {}
+      }
+
+      /* =======================================================================
+         JARVIS VOICE ENGINE (ANDROID CHROME + DESKTOP EDGE/CHROME BULLETPROOF)
+         ======================================================================= */
+      function updateVoiceDiag() {
+        try {
+          var el = byId('voiceDiagBox');
+          if (!el) return;
+          var sel = byId('browserVoiceSelect');
+          var voiceName = (sel && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex].text : 'System Default';
+          var prov = state.voiceProvider === 'openai'
+            ? 'OpenAI TTS (Neural)'
+            : (state.voiceProvider === 'elevenlabs' ? 'ElevenLabs (Neural)' : 'Browser Speech (Free)');
+          el.textContent =
+            'Provider: ' + prov +
+            ' • Voice: ' + voiceName +
+            ' • Rate ' + Number(state.voiceRate).toFixed(2) + 'x / Pitch ' + Number(state.voicePitch).toFixed(2) +
+            ' • ' + lastAudioDiag;
+        } catch (e) {}
+      }
+
+      function setJarvisStatus(text, mode) {
+        try {
+          var bar = byId('jarvisBar');
+          var lbl = byId('jarvisStatusText');
+          if (lbl) lbl.textContent = text;
+          if (bar) {
+            bar.classList.toggle('is-speaking', mode === 'speaking');
+            bar.classList.toggle('is-listening', mode === 'listening');
+          }
+          updateVoiceDiag();
+        } catch (e) {}
+      }
+
+      function stopAudio() {
+        try {
+          if (activeAudioEl) {
+            activeAudioEl.pause();
+            activeAudioEl.currentTime = 0;
+            activeAudioEl = null;
+          }
+        } catch (e) {}
+        try {
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
+        } catch (e) {}
+        setJarvisStatus(isListening ? 'JARVIS // LISTENING...' : 'JARVIS VOICE // STANDBY', isListening ? 'listening' : 'idle');
+      }
+
+      function scoreVoice(v) {
+        var s = 0;
+        var n = (v.name || '').toLowerCase();
+        var l = (v.lang || '').toLowerCase();
+        if (l.indexOf('en-gb') !== -1 || n.indexOf('uk') !== -1 || n.indexOf('british') !== -1) s += 12;
+        if (l.indexOf('en-ie') !== -1 || l.indexOf('en-au') !== -1) s += 8;
+        if (l.indexOf('en') === 0) s += 4;
+        if (n.indexOf('natural') !== -1 || n.indexOf('neural') !== -1 || n.indexOf('online') !== -1) s += 10;
+        if (n.indexOf('google') !== -1) s += 6;
+        if (n.indexOf('male') !== -1 || n.indexOf('ryan') !== -1 || n.indexOf('daniel') !== -1 || n.indexOf('arthur') !== -1) s += 4;
+        return s;
+      }
+
+      function populateBrowserVoices() {
+        try {
+          if (!('speechSynthesis' in window)) return;
+          var sel = byId('browserVoiceSelect');
+          if (!sel) return;
+          var all = window.speechSynthesis.getVoices() || [];
+          if (all.length === 0) return;
+
+          var ranked = all.slice().sort(function (a, b) {
+            return scoreVoice(b) - scoreVoice(a);
+          });
+
+          var list = state.ukFilterOnly
+            ? ranked.filter(function (v) {
+                var n = (v.name || '').toLowerCase();
+                var l = (v.lang || '').toLowerCase();
+                return l.indexOf('en-gb') !== -1 || n.indexOf('uk') !== -1 || n.indexOf('natural') !== -1 || n.indexOf('neural') !== -1;
+              })
+            : ranked;
+
+          if (list.length === 0) list = ranked;
+
+          sel.innerHTML =
+            '<option value="">System Default (Auto)</option>' +
+            list.map(function (v) {
+              var isUkOrNat = scoreVoice(v) >= 14;
+              var prefix = isUkOrNat ? '★ ' : '';
+              return '<option value="' + escapeHtml(v.voiceURI) + '">' + escapeHtml(prefix + v.name) + '</option>';
+            }).join('');
+
+          if (state.preferredVoiceURI && list.some(function (v) { return v.voiceURI === state.preferredVoiceURI; })) {
+            sel.value = state.preferredVoiceURI;
+          } else {
+            state.preferredVoiceURI = '';
+            sel.value = '';
+          }
+          updateVoiceDiag();
+        } catch (e) {}
+      }
+
+      function speakBrowser(text) {
+        if (!('speechSynthesis' in window)) {
+          lastAudioDiag = 'speechSynthesis unavailable';
+          setJarvisStatus('JARVIS // NO SPEECH API', 'idle');
+          showToast(text);
+          return;
+        }
+
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {}
+
+        setJarvisStatus('JARVIS // SPEAKING...', 'speaking');
+
+        setTimeout(function () {
+          try {
+            if (typeof window.speechSynthesis.resume === 'function') {
+              window.speechSynthesis.resume();
+            }
+            var voices = window.speechSynthesis.getVoices() || [];
+            var chosen = state.preferredVoiceURI
+              ? voices.find(function (v) { return v.voiceURI === state.preferredVoiceURI; })
+              : null;
+
+            function runUtterance(voiceObj, canRetryDefault) {
+              var utter = new SpeechSynthesisUtterance(text);
+              utter.voice = voiceObj || null;
+              utter.lang = (voiceObj && voiceObj.lang) ? voiceObj.lang : 'en-US';
+              utter.rate = Number(state.voiceRate) || 0.95;
+              utter.pitch = Number(state.voicePitch) || 0.90;
+
+              var vLabel = voiceObj ? voiceObj.name : 'System Default';
+
+              utter.onstart = function () {
+                lastAudioDiag = 'Playing (' + vLabel + ')';
+                setJarvisStatus('JARVIS // ' + vLabel.toUpperCase(), 'speaking');
+              };
+
+              utter.onend = function () {
+                lastAudioDiag = 'OK (' + vLabel + ')';
+                setJarvisStatus(isListening ? 'JARVIS // LISTENING...' : 'JARVIS VOICE // STANDBY', isListening ? 'listening' : 'idle');
+              };
+
+              utter.onerror = function (ev) {
+                var err = (ev && ev.error) ? ev.error : 'error';
+                if (canRetryDefault && voiceObj) {
+                  lastAudioDiag = 'Retrying System Default...';
+                  try { window.speechSynthesis.cancel(); } catch (e2) {}
+                  setTimeout(function () { runUtterance(null, false); }, 60);
+                  return;
+                }
+                lastAudioDiag = 'Speech error: ' + err;
+                setJarvisStatus('JARVIS // ERROR (' + err.toUpperCase() + ')', 'idle');
+              };
+
+              window.speechSynthesis.speak(utter);
+            }
+
+            runUtterance(chosen, true);
+          } catch (e) {
+            lastAudioDiag = 'Speech exception';
+            setJarvisStatus('JARVIS VOICE // STANDBY', 'idle');
+            showToast(text);
+          }
+        }, 60);
+      }
+
+      function speakNeural(text) {
+        var key = (neuralCfg.apiKey || '').trim();
+        if (!key) {
+          lastAudioDiag = 'No API key — Browser fallback';
+          speakBrowser(text);
+          return;
+        }
+
+        setJarvisStatus('JARVIS // NEURAL SYNTHESIS...', 'speaking');
+        var voiceId = (neuralCfg.voiceId || (state.voiceProvider === 'openai' ? 'onyx' : '21m00Tcm4TlvDq8ikWAM')).trim();
+        var req;
+
+        if (state.voiceProvider === 'openai') {
+          req = fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + key,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini-tts',
+              voice: voiceId,
+              input: text
+            })
+          }).then(function (r) {
+            if (!r.ok) throw new Error('OpenAI HTTP ' + r.status);
+            return r.blob();
+          });
+        } else {
+          req = fetch('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(voiceId), {
+            method: 'POST',
+            headers: {
+              'xi-api-key': key,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              text: text,
+              model_id: 'eleven_multilingual_v2'
+            })
+          }).then(function (r) {
+            if (!r.ok) throw new Error('ElevenLabs HTTP ' + r.status);
+            return r.blob();
+          });
+        }
+
+        req.then(function (blob) {
+          var url = URL.createObjectURL(blob);
+          var audio = new Audio(url);
+          activeAudioEl = audio;
+          audio.onended = function () {
+            URL.revokeObjectURL(url);
+            activeAudioEl = null;
+            lastAudioDiag = 'Neural audio OK';
+            setJarvisStatus('JARVIS VOICE // STANDBY', 'idle');
+          };
+          audio.onerror = function () {
+            URL.revokeObjectURL(url);
+            activeAudioEl = null;
+            lastAudioDiag = 'Audio tag error — Browser fallback';
+            speakBrowser(text);
+          };
+          return audio.play().then(function () {
+            lastAudioDiag = 'Playing Neural TTS';
+          });
+        }).catch(function (err) {
+          lastAudioDiag = (err && err.message ? err.message : 'Network error') + ' — fallback';
+          speakBrowser(text);
+        });
+      }
+
+      function speak(text, force) {
+        if (!force && !state.voiceCheckIns) return;
+        stopAudio();
+        var hasKey = Boolean((neuralCfg.apiKey || '').trim());
+        if ((state.voiceProvider === 'openai' || state.voiceProvider === 'elevenlabs') && hasKey) {
+          speakNeural(text);
+        } else {
+          speakBrowser(text);
+        }
+      }
+
+      function buildLiveBriefing() {
+        var now = new Date();
+        var d = now.getDay();
+        var hr = now.getHours();
+        var greet = hr < 12 ? 'Good morning Keith.' : hr < 17 ? 'Good afternoon Keith.' : 'Good evening Keith.';
+        var stats = computeTodayRemainingStats();
+
+        var shiftTxt = '';
+        if (d >= 0 && d <= 3) {
+          shiftTxt = state.peakSeason
+            ? 'You are on Peak work hours today, 7 AM to 6:30 PM.'
+            : 'You are on Standard work hours today, 7 AM to 5:30 PM.';
+        } else if (d === 4) {
+          shiftTxt = state.peakSeason
+            ? 'Thursday Peak shift runs 9 AM to 2:30 PM.'
+            : 'You are off work today.';
+        } else {
+          shiftTxt = 'You are off work today.';
+        }
+
+        var custodyTxt = '';
+        if (d === 3) {
+          custodyTxt = state.weekType === 'A'
+            ? 'Next milestone: kids pickup at 6 PM tonight for your Week A long weekend through Saturday at 8 PM.'
+            : 'Next milestone: kids pickup at 6 PM tonight for your Week B stay through Friday morning school drop-offs.';
+        } else if (d === 4) {
+          custodyTxt = 'School drop-offs are 7:30 AM for the older two and 8:30 AM at the bus, with pickups at 3:30 and 4:30 PM.';
+        } else if (d === 5) {
+          custodyTxt = state.weekType === 'B'
+            ? 'Morning drop-offs at 7:30 and 8:30 AM conclude Week B custody, leaving your afternoon and Saturday open.'
+            : 'Morning drop-offs are 7:30 and 8:30 AM, followed by pickups at 3:30 and 4:30 PM.';
+        } else if (d === 6) {
+          custodyTxt = state.weekType === 'A'
+            ? 'Saturday plant watering is on deck, and kids drop-off to their mom is tonight at 8 PM.'
+            : 'It is a free Week B Saturday—ideal for Saturday plant care, training, and deep work.';
+        } else {
+          custodyTxt = 'No school runs until Wednesday at 6 PM.';
+        }
+
+        var freeTxt = 'You have ' + formatDur(stats.openFreeLeftMins) + ' of unscheduled open time left today.';
+        var wCount = state.workouts.length;
+        var wTxt = 'You have logged ' + wCount + ' of 3 workouts this week.';
+
+        var openProj = state.projects.filter(function (p) { return !p.done; });
+        var pTxt = openProj.length === 0
+          ? 'All OSHA and web building tasks are complete.'
+          : 'You have ' + openProj.length + ' open OSHA or web building task' + (openProj.length === 1 ? '' : 's') + ', led by ' + openProj[0].title + '.';
+
+        return [greet, 'Today is ' + FULL_DAYS[d] + ', Week ' + state.weekType + '.', shiftTxt, custodyTxt, freeTxt, wTxt, pTxt].join(' ');
+      }
+
+      function processVoiceCommand(raw) {
+        var cmd = String(raw || '').toLowerCase().trim();
+        setJarvisStatus('HEARD: "' + cmd.toUpperCase() + '"', 'idle');
+
+        if (cmd.indexOf('brief') !== -1 || cmd.indexOf('status') !== -1 || cmd.indexOf('report') !== -1) {
+          speak(buildLiveBriefing(), true);
+        } else if (cmd.indexOf('next') !== -1 || cmd.indexOf('schedule') !== -1) {
+          var blocks = getDaySchedule(new Date().getDay(), state.weekType, state.peakSeason);
+          var seq = blocks.map(function (b) { return b.time + ', ' + b.title; }).join('. Next: ');
+          speak('Today’s sequence: ' + seq + '.', true);
+        } else if (cmd.indexOf('log workout') !== -1 || cmd.indexOf('workout') !== -1) {
+          KeithCmd.logWorkout('Voice-Logged Session');
+        } else if (cmd.indexOf('peak') !== -1) {
+          state.peakSeason = true;
+          saveState();
+          renderAll();
+          speak('Switched to Peak mode: Sunday through Wednesday until 6:30 PM, Thursday 9 AM to 2:30 PM.', true);
+        } else if (cmd.indexOf('standard') !== -1) {
+          state.peakSeason = false;
+          saveState();
+          renderAll();
+          speak('Switched to Standard mode: Sunday through Wednesday until 5:30 PM, Thursdays off.', true);
+        } else if (cmd.indexOf('week a') !== -1) {
+          state.weekType = 'A';
+          saveState();
+          renderAll();
+          speak('Set to Week A: Wednesday 6 PM through Saturday 8 PM.', true);
+        } else if (cmd.indexOf('week b') !== -1) {
+          state.weekType = 'B';
+          saveState();
+          renderAll();
+          speak('Set to Week B: Wednesday 6 PM through Friday morning drop-offs.', true);
+        } else if (cmd.indexOf('task') !== -1 || cmd.indexOf('osha') !== -1 || cmd.indexOf('web') !== -1) {
+          var open = state.projects.filter(function (p) { return !p.done; });
+          speak(open.length === 0 ? 'All OSHA and web tasks are complete.' : 'Open tasks: ' + open.map(function (p) { return p.title; }).join('; ') + '.', true);
+        } else {
+          speak('Try saying: Brief me, What is next, Log workout, Peak mode, Standard mode, Week A, Week B, or Read tasks.', true);
+        }
+      }
+
+      /* =======================================================================
+         SCHEDULE & 24-HOUR TIME-BLOCK MATH
+         ======================================================================= */
+      function minsToTimeStr(mins) {
+        var clamped = Math.max(0, Math.min(1440, Math.round(mins)));
+        if (clamped === 1440) return '12:00 AM';
+        var h24 = Math.floor(clamped / 60);
+        var m = clamped % 60;
+        var ampm = h24 >= 12 ? 'PM' : 'AM';
+        var h12 = h24 % 12;
+        if (h12 === 0) h12 = 12;
+        return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+      }
+
+      function formatDur(mins) {
+        var m = Math.max(0, Math.round(mins));
+        var h = Math.floor(m / 60);
+        var rem = m % 60;
+        if (h === 0) return rem + 'm';
+        if (rem === 0) return h + 'h';
+        return h + 'h ' + rem + 'm';
+      }
+
+      function getDaySchedule(dayIdx, weekType, isPeak) {
+        var blocks = [];
+        var workEnd = isPeak ? '6:30 PM' : '5:30 PM';
+        var workLabel = isPeak ? 'Work Shift (Peak Window)' : 'Work Shift (Standard)';
+
+        if (dayIdx === 0) {
+          blocks.push({ time: '5:45 AM – 6:30 AM', title: 'Early Workout Window', sub: 'Optional fast session before 7:00 AM shift', type: 'open' });
+          blocks.push({ time: '7:00 AM – ' + workEnd, title: workLabel, sub: 'Sunday shift', type: 'work' });
+          blocks.push({ time: workEnd + ' – 9:30 PM', title: 'Evening Recovery / OSHA or Web Prep', sub: 'Quiet evening block', type: 'open' });
+        } else if (dayIdx === 1) {
+          blocks.push({ time: '7:00 AM – ' + workEnd, title: workLabel, sub: 'Monday shift', type: 'work' });
+          blocks.push({ time: workEnd + ' – 9:30 PM', title: 'Open Evening: Workout or OSHA / Web Build', sub: 'No school runs tonight', type: 'open' });
+        } else if (dayIdx === 2) {
+          blocks.push({ time: '7:00 AM – ' + workEnd, title: workLabel, sub: 'Tuesday shift', type: 'work' });
+          blocks.push({ time: workEnd + ' – 9:30 PM', title: 'Open Evening: Workout or Prep for Tomorrow', sub: 'Kids arrive Wednesday at 6:00 PM', type: 'open' });
+        } else if (dayIdx === 3) {
+          blocks.push({ time: '7:00 AM – ' + workEnd, title: workLabel, sub: isPeak ? 'Peak ends 6:30 PM vs 6:00 PM pickup' : 'Off at 5:30 PM — 30 min buffer before pickup', type: 'work' });
+          blocks.push({ time: '6:00 PM', title: 'Pick Up Kids', sub: weekType === 'A' ? 'Week A Long Weekend (through Sat 8:00 PM)' : 'Week B Stay (through Fri morning drop-offs)', type: 'custody' });
+        } else if (dayIdx === 4) {
+          blocks.push({ time: '7:30 AM', title: 'School Drop-Off (Older 2 Kids)', sub: 'Morning school run', type: 'custody' });
+          blocks.push({ time: '8:30 AM', title: 'Bus Drop-Off (Youngest)', sub: 'Morning bus stop', type: 'custody' });
+          if (isPeak) {
+            blocks.push({ time: '9:00 AM – 2:30 PM', title: 'Thursday Peak Work Shift', sub: 'Short 5.5-hour peak shift', type: 'work' });
+            blocks.push({ time: '2:30 PM – 3:30 PM', title: 'Prime 1-Hour Window: Workout or OSHA Sprint', sub: 'Between work & afternoon school pickup', type: 'open' });
+          } else {
+            blocks.push({ time: '8:45 AM – 3:15 PM', title: 'Wide-Open Daytime Window (Off Work)', sub: 'Best day for Workout + OSHA Class + Web Building', type: 'open' });
+          }
+          blocks.push({ time: '3:30 PM', title: 'School Pick-Up (Older 2 Kids)', sub: 'Afternoon school pickup', type: 'custody' });
+          blocks.push({ time: '4:30 PM', title: 'Bus Stop Pick-Up (Youngest)', sub: 'Afternoon bus stop', type: 'custody' });
+        } else if (dayIdx === 5) {
+          blocks.push({ time: '7:30 AM', title: 'School Drop-Off (Older 2 Kids)', sub: 'Morning school run', type: 'custody' });
+          blocks.push({ time: '8:30 AM', title: 'Bus Drop-Off (Youngest)', sub: weekType === 'B' ? 'Week B handoff complete — free Fri PM & Saturday!' : 'Kids return to you at 3:30 / 4:30 PM', type: 'custody' });
+          if (weekType === 'A') {
+            blocks.push({ time: '8:45 AM – 3:15 PM', title: 'Open Daytime Window (Off Work)', sub: 'Great slot for Workout + OSHA / Web Building', type: 'open' });
+            blocks.push({ time: '3:30 PM', title: 'School Pick-Up (Older 2 Kids)', sub: 'Friday afternoon pickup', type: 'custody' });
+            blocks.push({ time: '4:30 PM', title: 'Bus Stop Pick-Up (Youngest)', sub: 'Kids stay through Saturday 8:00 PM', type: 'custody' });
+          } else {
+            blocks.push({ time: '8:45 AM – Evening', title: 'Full Free Friday (Off Work & No Evening Pickup)', sub: 'Prime window for Workout, Web Building & OSHA Material', type: 'open' });
+          }
+        } else if (dayIdx === 6) {
+          blocks.push({ time: 'Morning', title: 'Saturday Plant Watering Ritual', sub: 'Monstera, pothos, philodendron, hoya, orchids, props & humidifier', type: 'open' });
+          if (weekType === 'A') {
+            blocks.push({ time: 'All Day – 8:00 PM', title: 'Kids Weekend Day', sub: 'Family time before evening drop-off', type: 'custody' });
+            blocks.push({ time: '8:00 PM', title: 'Drop Off Kids to Mom', sub: 'Concludes Week A custody stay', type: 'custody' });
+          } else {
+            blocks.push({ time: 'All Day', title: 'Free Saturday (Week B Off-Weekend)', sub: 'Open time for Workout, Web Building, OSHA & recovery', type: 'open' });
+          }
+        }
+        return blocks;
+      }
+
+      function get24HourBlocks(dayIdx, weekType, isPeak) {
+        var list = [];
+        var workEndMins = isPeak ? (18 * 60 + 30) : (17 * 60 + 30);
+        var workLabel = isPeak ? 'Work Shift (Peak)' : 'Work Shift (Standard)';
+
+        if (dayIdx >= 0 && dayIdx <= 3) {
+          list.push({
+            id: 'sys-work-' + dayIdx,
+            startMins: 7 * 60,
+            durationMins: workEndMins - (7 * 60),
+            title: workLabel,
+            kind: 'work',
+            custom: false
+          });
+        } else if (dayIdx === 4 && isPeak) {
+          list.push({
+            id: 'sys-work-4',
+            startMins: 9 * 60,
+            durationMins: (14 * 60 + 30) - (9 * 60),
+            title: 'Thu Peak Work Shift',
+            kind: 'work',
+            custom: false
+          });
+        }
+
+        if (dayIdx === 3) {
+          list.push({
+            id: 'sys-cust-wed',
+            startMins: 18 * 60,
+            durationMins: 360,
+            title: weekType === 'A' ? 'Kids Custody (Week A Start)' : 'Kids Custody (Week B Start)',
+            kind: 'custody',
+            custom: false
+          });
+        } else if (dayIdx === 4) {
+          list.push({ id: 'sys-sch-4a', startMins: 7 * 60 + 30, durationMins: 45, title: 'School Drop-Off (Older 2)', kind: 'custody', custom: false });
+          list.push({ id: 'sys-bus-4b', startMins: 8 * 60 + 30, durationMins: 30, title: 'Bus Drop-Off (Youngest)', kind: 'custody', custom: false });
+          list.push({ id: 'sys-sch-4c', startMins: 15 * 60 + 30, durationMins: 45, title: 'School Pick-Up (Older 2)', kind: 'custody', custom: false });
+          list.push({ id: 'sys-bus-4d', startMins: 16 * 60 + 30, durationMins: 390, title: 'Bus Pick-Up & Evening Custody', kind: 'custody', custom: false });
+        } else if (dayIdx === 5) {
+          list.push({ id: 'sys-sch-5a', startMins: 7 * 60 + 30, durationMins: 45, title: 'School Drop-Off (Older 2)', kind: 'custody', custom: false });
+          list.push({ id: 'sys-bus-5b', startMins: 8 * 60 + 30, durationMins: 30, title: weekType === 'B' ? 'Bus Drop-Off (Week B End)' : 'Bus Drop-Off (Youngest)', kind: 'custody', custom: false });
+          if (weekType === 'A') {
+            list.push({ id: 'sys-sch-5c', startMins: 15 * 60 + 30, durationMins: 45, title: 'School Pick-Up (Older 2)', kind: 'custody', custom: false });
+            list.push({ id: 'sys-bus-5d', startMins: 16 * 60 + 30, durationMins: 450, title: 'Bus Pick-Up & Week A Custody', kind: 'custody', custom: false });
+          }
+        } else if (dayIdx === 6) {
+          list.push({ id: 'sys-plant-6', startMins: 9 * 60 + 30, durationMins: 45, title: 'Saturday Plant Watering', kind: 'custom', custom: false });
+          if (weekType === 'A') {
+            list.push({ id: 'sys-cust-sat', startMins: 10 * 60 + 15, durationMins: (20 * 60) - (10 * 60 + 15), title: 'Kids Weekend → 8:00 PM Mom Drop-Off', kind: 'custody', custom: false });
+          }
+        }
+
+        state.customTimeBlocks.forEach(function (tb) {
+          if (Number(tb.dayIdx) === dayIdx) {
+            var catLow = String(tb.category || '').toLowerCase();
+            var isWorkout = catLow.indexOf('workout') !== -1 || String(tb.title || '').toLowerCase().indexOf('workout') !== -1;
+            list.push({
+              id: tb.id,
+              startMins: Number(tb.startMins) || 0,
+              durationMins: Math.max(15, Number(tb.durationMins) || 60),
+              title: tb.title + (tb.category ? ' [' + tb.category + ']' : ''),
+              kind: isWorkout ? 'workout' : 'custom',
+              custom: true
+            });
+          }
+        });
+
+        return list.sort(function (a, b) { return a.startMins - b.startMins; });
+      }
+
+      function computeTodayRemainingStats() {
+        var now = new Date();
+        var dIdx = now.getDay();
+        var nowMins = now.getHours() * 60 + now.getMinutes();
+        var totalLeftMins = Math.max(0, 1440 - nowMins);
+        var pctElapsed = Math.min(100, Math.max(0, Math.round((nowMins / 1440) * 100)));
+
+        var blocks = get24HourBlocks(dIdx, state.weekType, state.peakSeason);
+        var busyMask = new Array(1440).fill(false);
+        blocks.forEach(function (b) {
+          var s = Math.max(0, Math.floor(b.startMins));
+          var e = Math.min(1440, Math.ceil(b.startMins + b.durationMins));
+          for (var m = s; m < e; m++) {
+            busyMask[m] = true;
+          }
+        });
+
+        var openFreeLeftMins = 0;
+        for (var m = nowMins; m < 1440; m++) {
+          if (!busyMask[m]) openFreeLeftMins++;
+        }
+
+        var nextBlock = null;
+        for (var i = 0; i < blocks.length; i++) {
+          if (blocks[i].startMins > nowMins) {
+            nextBlock = blocks[i];
+            break;
+          }
+        }
+
+        return {
+          nowMins: nowMins,
+          totalLeftMins: totalLeftMins,
+          openFreeLeftMins: openFreeLeftMins,
+          pctElapsed: pctElapsed,
+          nextBlock: nextBlock
+        };
+      }
+
+      /* =======================================================================
+         RENDERING FUNCTIONS
+         ======================================================================= */
+      function applyThemeAndHeader() {
+        var theme = DARK_THEMES[state.themeKey] || DARK_THEMES.obsidian_bronze;
+        var root = document.documentElement;
+        Object.keys(theme.vars).forEach(function (k) {
+          root.style.setProperty(k, theme.vars[k]);
+        });
+
+        var kicker = byId('brandKicker');
+        if (kicker) kicker.textContent = theme.kicker;
+
+        var now = new Date();
+        var dateOpts = { weekday: 'long', month: 'short', day: 'numeric' };
+        var dateSub = byId('todayDateSub');
+        if (dateSub) {
+          dateSub.textContent = now.toLocaleDateString('en-US', dateOpts) + ' • Week ' + state.weekType + ' Active';
+        }
+
+        var wLbl = byId('weekCycleLabel');
+        if (wLbl) {
+          wLbl.textContent = state.weekType === 'A'
+            ? 'Week A: Wed 6p – Sat 8p'
+            : 'Week B: Wed 6p – Fri AM';
+        }
+
+        var pLbl = byId('peakShiftLabel');
+        if (pLbl) {
+          pLbl.textContent = state.peakSeason
+            ? 'Peak: Sun–Wed 6:30p + Thu 9–2:30'
+            : 'Standard: Sun–Wed 5:30p (Thu Off)';
+        }
+
+        document.body.classList.toggle('hud-embed-mode', Boolean(state.hudEmbedMode));
+
+        var ciBtn = byId('jarvisCheckInsBtn');
+        if (ciBtn) {
+          ciBtn.textContent = state.voiceCheckIns ? '🔔 Check-Ins: ON' : '🔕 Check-Ins: OFF';
+        }
+
+        var opts = document.querySelectorAll('.theme-option');
+        for (var i = 0; i < opts.length; i++) {
+          opts[i].classList.toggle('is-selected', opts[i].getAttribute('data-theme') === state.themeKey);
+        }
+      }
+
+      function syncVoiceDrawerUI() {
+        var provSel = byId('voiceProviderSelect');
+        var ukChk = byId('ukFilterCheckbox');
+        var rSlider = byId('voiceRateSlider');
+        var pSlider = byId('voicePitchSlider');
+        var rLbl = byId('voiceRateLabel');
+        var pLbl = byId('voicePitchLabel');
+        var neuralSec = byId('neuralApiSection');
+        var kIn = byId('neuralApiKeyInput');
+        var vIn = byId('neuralVoiceIdInput');
+
+        if (provSel) provSel.value = state.voiceProvider;
+        if (ukChk) ukChk.checked = Boolean(state.ukFilterOnly);
+        if (rSlider) rSlider.value = String(state.voiceRate);
+        if (pSlider) pSlider.value = String(state.voicePitch);
+        if (rLbl) rLbl.textContent = Number(state.voiceRate).toFixed(2) + 'x';
+        if (pLbl) pLbl.textContent = Number(state.voicePitch).toFixed(2);
+        if (kIn) kIn.value = neuralCfg.apiKey || '';
+        if (vIn) vIn.value = neuralCfg.voiceId || 'onyx';
+        if (neuralSec) {
+          neuralSec.style.display = (state.voiceProvider === 'openai' || state.voiceProvider === 'elevenlabs') ? 'flex' : 'none';
+        }
+        updateVoiceDiag();
+      }
+
+      function renderLiveCountdown() {
+        var stats = computeTodayRemainingStats();
+        var dayLeftEl = byId('dayHoursLeftVal');
+        var openLeftEl = byId('openHoursLeftVal');
+        var pctEl = byId('dayPctElapsedVal');
+        var meterEl = byId('dayMeterElapsedBar');
+        var nextEl = byId('nextBlockCountdownTxt');
+        var clockEl = byId('liveClockTxt');
+
+        if (dayLeftEl) dayLeftEl.textContent = formatDur(stats.totalLeftMins);
+        if (openLeftEl) openLeftEl.textContent = formatDur(stats.openFreeLeftMins);
+        if (pctEl) pctEl.textContent = stats.pctElapsed + '%';
+        if (meterEl) meterEl.style.width = stats.pctElapsed + '%';
+
+        if (clockEl) {
+          clockEl.textContent = minsToTimeStr(stats.nowMins);
+        }
+
+        if (nextEl) {
+          if (stats.nextBlock) {
+            var minsAway = stats.nextBlock.startMins - stats.nowMins;
+            nextEl.textContent = 'Next in ' + formatDur(minsAway) + ': ' + stats.nextBlock.title + ' (' + minsToTimeStr(stats.nextBlock.startMins) + ')';
+          } else {
+            nextEl.textContent = 'All scheduled blocks for today complete.';
+          }
+        }
+      }
+
+      function renderAccordions() {
+        Object.keys(state.collapsedSections).forEach(function (key) {
+          var sec = byId('sec-' + key);
+          if (sec) {
+            sec.classList.toggle('is-collapsed', Boolean(state.collapsedSections[key]));
+          }
+        });
+      }
+
+      function polarToCartesian(cx, cy, r, angleDeg) {
+        var rad = ((angleDeg - 90) * Math.PI) / 180.0;
+        return {
+          x: cx + r * Math.cos(rad),
+          y: cy + r * Math.sin(rad)
+        };
+      }
+
+      function describeArcPath(cx, cy, r, startAngle, endAngle) {
+        var sweep = endAngle - startAngle;
+        if (sweep >= 359.9) sweep = 359.9;
+        var start = polarToCartesian(cx, cy, r, startAngle);
+        var end = polarToCartesian(cx, cy, r, startAngle + sweep);
+        var largeArcFlag = sweep <= 180 ? '0' : '1';
+        return ['M', start.x.toFixed(2), start.y.toFixed(2), 'A', r, r, 0, largeArcFlag, 1, end.x.toFixed(2), end.y.toFixed(2)].join(' ');
+      }
+
+      function describeSectorPath(cx, cy, r, startAngle, endAngle) {
+        var sweep = Math.min(359.9, Math.max(0.5, endAngle - startAngle));
+        var start = polarToCartesian(cx, cy, r, startAngle);
+        var end = polarToCartesian(cx, cy, r, startAngle + sweep);
+        var largeArcFlag = sweep <= 180 ? '0' : '1';
+        return [
+          'M', cx, cy,
+          'L', start.x.toFixed(2), start.y.toFixed(2),
+          'A', r, r, 0, largeArcFlag, 1, end.x.toFixed(2), end.y.toFixed(2),
+          'Z'
+        ].join(' ');
+      }
+
+      function getKindStrokeColor(kind) {
+        if (kind === 'work') return 'var(--work-accent)';
+        if (kind === 'custody') return 'var(--accent-bright)';
+        if (kind === 'workout') return 'var(--training-accent)';
+        return 'var(--secondary-accent)';
+      }
+
+      function render24HourGraph() {
+        var stage = byId('radialChronoStage');
+        var inspector = byId('chronoInspectorBox');
+        var capTrack = byId('capacityBarTrack');
+        var statsGrid = byId('capacityStatsGrid');
+        var heading = byId('graph24Heading');
+        var sumTag = byId('graph24SummaryTag');
+        if (!stage || !capTrack) return;
+
+        var dIdx = state.selectedDayIndex;
+        var blocks = get24HourBlocks(dIdx, state.weekType, state.peakSeason);
+        var now = new Date();
+        var isToday = now.getDay() === dIdx;
+        var nowMins = now.getHours() * 60 + now.getMinutes();
+
+        var catMask = new Array(1440).fill('free');
+        blocks.forEach(function (b) {
+          var s = Math.max(0, Math.floor(b.startMins));
+          var e = Math.min(1440, Math.ceil(b.startMins + b.durationMins));
+          for (var m = s; m < e; m++) {
+            catMask[m] = b.kind;
+          }
+        });
+
+        var workMins = 0;
+        var custodyMins = 0;
+        var taskMins = 0;
+        var freeMins = 0;
+        for (var i = 0; i < 1440; i++) {
+          if (catMask[i] === 'work') workMins++;
+          else if (catMask[i] === 'custody') custodyMins++;
+          else if (catMask[i] === 'free') freeMins++;
+          else taskMins++;
+        }
+
+        var busyMins = 1440 - freeMins;
+        if (heading) heading.textContent = '24h Chronometer — ' + FULL_DAYS[dIdx];
+        if (sumTag) sumTag.textContent = formatDur(freeMins) + ' free / 24h';
+
+        var cx = 130;
+        var cy = 130;
+        var r = 96;
+
+        var elapsedSectorSvg = '';
+        if (isToday && nowMins > 2) {
+          var elapsedDeg = (nowMins / 1440) * 360;
+          elapsedSectorSvg =
+            '<path d="' + describeSectorPath(cx, cy, r + 13, 0, elapsedDeg) + '" fill="rgba(255,255,255,0.035)" pointer-events="none"></path>';
+        }
+
+        var ticksSvg = '';
+        for (var h = 0; h < 24; h++) {
+          var deg = (h / 24) * 360;
+          var isMajor = h % 6 === 0;
+          var p1 = polarToCartesian(cx, cy, r + 14, deg);
+          var p2 = polarToCartesian(cx, cy, r + (isMajor ? 21 : 18), deg);
+          ticksSvg +=
+            '<line x1="' + p1.x.toFixed(1) + '" y1="' + p1.y.toFixed(1) + '" x2="' + p2.x.toFixed(1) + '" y2="' + p2.y.toFixed(1) + '" ' +
+            'stroke="' + (isMajor ? 'var(--accent-bright)' : 'var(--border-strong)') + '" stroke-width="' + (isMajor ? '2' : '1') + '" />';
+        }
+
+        var cardinals = [
+          { deg: 0, label: '00h', rOff: 28 },
+          { deg: 90, label: '06h', rOff: 29 },
+          { deg: 180, label: '12h', rOff: 28 },
+          { deg: 270, label: '18h', rOff: 29 }
+        ];
+        var cardinalSvg = cardinals.map(function (c) {
+          var pt = polarToCartesian(cx, cy, r + c.rOff, c.deg);
+          return (
+            '<text x="' + pt.x.toFixed(1) + '" y="' + pt.y.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" ' +
+            'fill="var(--text-secondary)" font-family="var(--font-mono)" font-size="9.5" font-weight="800">' + c.label + '</text>'
+          );
+        }).join('');
+
+        var arcsSvg = blocks.map(function (b) {
+          var startDeg = (b.startMins / 1440) * 360;
+          var rawSweep = (b.durationMins / 1440) * 360;
+          var endDeg = startDeg + Math.max(3.2, rawSweep - 0.6);
+          var isSel = selectedBlockId === b.id;
+          var color = getKindStrokeColor(b.kind);
+          return (
+            '<path class="chrono-arc ' + (isSel ? 'is-selected' : '') + '" ' +
+            'd="' + describeArcPath(cx, cy, r, startDeg, endDeg) + '" ' +
+            'stroke="' + color + '" stroke-width="20" ' +
+            'data-action="inspect-block" data-block-id="' + escapeHtml(b.id) + '" />'
+          );
+        }).join('');
+
+        var nowNeedleSvg = '';
+        if (isToday) {
+          var nowDeg = (nowMins / 1440) * 360;
+          var innerPt = polarToCartesian(cx, cy, r - 18, nowDeg);
+          var outerPt = polarToCartesian(cx, cy, r + 18, nowDeg);
+          nowNeedleSvg =
+            '<line x1="' + innerPt.x.toFixed(1) + '" y1="' + innerPt.y.toFixed(1) + '" x2="' + outerPt.x.toFixed(1) + '" y2="' + outerPt.y.toFixed(1) + '" ' +
+            'stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" pointer-events="none" />' +
+            '<circle cx="' + outerPt.x.toFixed(1) + '" cy="' + outerPt.y.toFixed(1) + '" r="3.5" fill="var(--accent-bright)" stroke="#ffffff" stroke-width="1.2" pointer-events="none" />';
+        }
+
+        var selectedBlock = selectedBlockId ? blocks.find(function (x) { return x.id === selectedBlockId; }) : null;
+        if (selectedBlockId && !selectedBlock) selectedBlockId = null;
+
+        var coreKicker = selectedBlock ? 'SELECTED ARC' : (isToday ? 'FREE IN 24H' : FULL_DAYS[dIdx].toUpperCase());
+        var coreMain = selectedBlock
+          ? formatDur(selectedBlock.durationMins)
+          : formatDur(freeMins);
+        var coreSub = selectedBlock
+          ? selectedBlock.title
+          : formatDur(busyMins) + ' scheduled of 24h';
+
+        stage.innerHTML =
+          '<svg class="radial-svg" viewBox="0 0 260 260" role="img" aria-label="24-Hour Radial Schedule Dial">' +
+            elapsedSectorSvg +
+            '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--bg-obsidian)" stroke-width="21" />' +
+            '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--border-subtle)" stroke-width="20" stroke-dasharray="2 3" />' +
+            ticksSvg +
+            cardinalSvg +
+            arcsSvg +
+            nowNeedleSvg +
+          '</svg>' +
+          '<div class="radial-hud-core">' +
+            '<div class="core-kicker">' + escapeHtml(coreKicker) + '</div>' +
+            '<div class="core-main-val">' + escapeHtml(coreMain) + '</div>' +
+            '<div class="core-sub-val">' + escapeHtml(coreSub) + '</div>' +
+          '</div>';
+
+        if (inspector) {
+          if (selectedBlock) {
+            var endMins = Math.min(1440, selectedBlock.startMins + selectedBlock.durationMins);
+            inspector.innerHTML =
+              '<div style="min-width:0;">' +
+                '<p class="inspector-title">' + escapeHtml(selectedBlock.title) + '</p>' +
+                '<div class="inspector-meta">' +
+                  minsToTimeStr(selectedBlock.startMins) + ' – ' + minsToTimeStr(endMins) + ' (' + formatDur(selectedBlock.durationMins) + ')' +
+                '</div>' +
+              '</div>' +
+              '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+                (selectedBlock.custom
+                  ? '<button type="button" class="pill-btn is-danger-soft" data-action="delete-block" data-block-id="' + escapeHtml(selectedBlock.id) + '" style="min-height:32px;padding:3px 9px;font-size:11px;">Delete</button>'
+                  : '') +
+                '<button type="button" class="icon-btn-sm" data-action="clear-inspect" style="min-height:32px;font-size:11px;">Clear</button>' +
+              '</div>';
+          } else {
+            inspector.innerHTML =
+              '<div>' +
+                '<p class="inspector-title">Tap any arc on the 24h ring or bar to inspect</p>' +
+                '<div class="inspector-meta">' + blocks.length + ' blocks plotted • ' + formatDur(freeMins) + ' unscheduled open capacity</div>' +
+              '</div>';
+          }
+        }
+
+        var segsHtml = blocks.map(function (b) {
+          var leftPct = ((b.startMins / 1440) * 100).toFixed(2);
+          var widthPct = Math.max(1.2, (b.durationMins / 1440) * 100).toFixed(2);
+          var isSel = selectedBlockId === b.id;
+          var bg = getKindStrokeColor(b.kind);
+          return (
+            '<div class="cap-seg ' + (isSel ? 'is-selected' : '') + '" ' +
+            'style="left:' + leftPct + '%;width:' + widthPct + '%;background:' + bg + ';" ' +
+            'title="' + escapeHtml(b.title) + '" ' +
+            'data-action="inspect-block" data-block-id="' + escapeHtml(b.id) + '"></div>'
+          );
+        }).join('');
+
+        var barLaser = isToday
+          ? '<div class="cap-now-laser" style="left:' + ((nowMins / 1440) * 100).toFixed(2) + '%;"></div>'
+          : '';
+
+        capTrack.innerHTML = segsHtml + barLaser;
+
+        if (statsGrid) {
+          statsGrid.innerHTML =
+            '<div class="cap-stat-pill">' +
+              '<div class="cap-stat-label"><span class="legend-dot" style="background:var(--work-accent);"></span>Work</div>' +
+              '<div class="cap-stat-val">' + formatDur(workMins) + '</div>' +
+            '</div>' +
+            '<div class="cap-stat-pill">' +
+              '<div class="cap-stat-label"><span class="legend-dot" style="background:var(--accent-bright);"></span>Custody</div>' +
+              '<div class="cap-stat-val">' + formatDur(custodyMins) + '</div>' +
+            '</div>' +
+            '<div class="cap-stat-pill">' +
+              '<div class="cap-stat-label"><span class="legend-dot" style="background:var(--training-accent);"></span>Tasks/Gym</div>' +
+              '<div class="cap-stat-val">' + formatDur(taskMins) + '</div>' +
+            '</div>' +
+            '<div class="cap-stat-pill">' +
+              '<div class="cap-stat-label"><span class="legend-dot" style="background:var(--border-strong);"></span>Open Free</div>' +
+              '<div class="cap-stat-val" style="color:var(--secondary-accent);">' + formatDur(freeMins) + '</div>' +
+            '</div>';
+        }
+      }
+
+      function renderTimeline() {
+        var badge = byId('scheduleBadgeTag');
+        var pillsBar = byId('dayPillsBar');
+        var dayLbl = byId('carouselDayLabel');
+        var fwBtn = byId('fullWeekToggleBtn');
+        var container = byId('dayScheduleContainer');
+        if (!container) return;
+
+        if (badge) {
+          badge.textContent = state.weekType === 'A' ? 'Week A (Long)' : 'Week B (Short)';
+        }
+        if (fwBtn) {
+          fwBtn.textContent = state.fullWeekView ? 'Single Day View' : 'Full Week View';
+        }
+        if (dayLbl) {
+          dayLbl.textContent = state.fullWeekView ? 'All 7 Days (Week ' + state.weekType + ')' : FULL_DAYS[state.selectedDayIndex];
+        }
+
+        if (pillsBar) {
+          pillsBar.innerHTML = DAYS.map(function (dName, idx) {
+            var hasKids = (idx === 3 || idx === 4 || (idx === 5 && state.weekType === 'A') || (idx === 6 && state.weekType === 'A'));
+            var active = !state.fullWeekView && idx === state.selectedDayIndex;
+            return (
+              '<button type="button" class="day-tab ' + (active ? 'is-active' : '') + '" data-action="select-day" data-day="' + idx + '">' +
+                '<span>' + dName + '</span>' +
+                (hasKids ? '<span class="custody-pip" title="Kids Custody Day"></span>' : '<span style="height:6px;"></span>') +
+              '</button>'
+            );
+          }).join('');
+        }
+
+        if (state.fullWeekView) {
+          container.className = 'timeline-list';
+          container.innerHTML = DAYS.map(function (dName, idx) {
+            var blocks = getDaySchedule(idx, state.weekType, state.peakSeason);
+            return (
+              '<div class="full-week-day-group">' +
+                '<div style="font-size:12px;font-weight:800;color:var(--accent-bright);margin-bottom:6px;">' + FULL_DAYS[idx] + '</div>' +
+                '<div class="timeline-list">' +
+                  blocks.map(function (b) {
+                    return (
+                      '<div class="time-block type-' + escapeHtml(b.type) + '">' +
+                        '<div>' +
+                          '<p class="block-title">' + escapeHtml(b.title) + '</p>' +
+                          '<p class="block-sub">' + escapeHtml(b.sub) + '</p>' +
+                        '</div>' +
+                        '<div class="time-stamp">' + escapeHtml(b.time) + '</div>' +
+                      '</div>'
+                    );
+                  }).join('') +
+                '</div>' +
+              '</div>'
+            );
+          }).join('');
+        } else {
+          var animClass = lastSlideDirection === 'next'
+            ? 'anim-slide-next'
+            : (lastSlideDirection === 'prev' ? 'anim-slide-prev' : '');
+          lastSlideDirection = null;
+          container.className = 'timeline-list ' + animClass;
+          var blocks = getDaySchedule(state.selectedDayIndex, state.weekType, state.peakSeason);
+          container.innerHTML = blocks.map(function (b) {
+            return (
+              '<div class="time-block type-' + escapeHtml(b.type) + '">' +
+                '<div>' +
+                  '<p class="block-title">' + escapeHtml(b.title) + '</p>' +
+                  '<p class="block-sub">' + escapeHtml(b.sub) + '</p>' +
+                '</div>' +
+                '<div class="time-stamp">' + escapeHtml(b.time) + '</div>' +
+              '</div>'
+            );
+          }).join('');
+        }
+      }
+
+      function renderWorkouts() {
+        var count = state.workouts.length;
+        var pct = Math.min(100, Math.round((count / 3) * 100));
+        var tag = byId('workoutGoalTag');
+        var bar = byId('workoutProgressBar');
+        var hint = byId('workoutWindowHint');
+        var chips = byId('workoutLogChips');
+
+        if (tag) tag.textContent = count + ' / 3 This Week' + (count >= 3 ? ' ★' : '');
+        if (bar) bar.style.width = pct + '%';
+        if (hint) {
+          hint.textContent = state.peakSeason
+            ? 'Peak windows: Thu 2:30–3:30 PM, Mon/Tue evenings after 6:30 PM, or early before 7:00 AM.'
+            : 'Standard windows: Thu daytime (off work), Fri ' + (state.weekType === 'B' ? 'afternoon/evening' : '8:45a–3:15p') + ', or evenings after 5:30 PM.';
+        }
+        if (chips) {
+          chips.innerHTML = state.workouts.map(function (w, idx) {
+            return (
+              '<span class="log-chip">' +
+                '<span>' + escapeHtml(w.label) + ' (' + escapeHtml(w.day) + ')</span>' +
+                '<button type="button" data-action="delete-workout" data-idx="' + idx + '" style="background:none;border:none;color:inherit;font-weight:900;cursor:pointer;padding:0 2px;">×</button>' +
+              '</span>'
+            );
+          }).join('');
+        }
+      }
+
+      function buildSwipeCheckRow(opts) {
+        return (
+          '<div class="swipe-item-wrapper">' +
+            '<div class="swipe-item-bg">' +
+              '<span>✓ SWIPE RIGHT TO COMPLETE</span>' +
+              '<span>✓ DONE</span>' +
+            '</div>' +
+            '<div class="check-row ' + (opts.done ? 'is-done' : '') + '" data-kind="' + escapeHtml(opts.kind) + '" data-id="' + escapeHtml(opts.id) + '">' +
+              '<div class="check-left" data-action="toggle-item" data-kind="' + escapeHtml(opts.kind) + '" data-id="' + escapeHtml(opts.id) + '">' +
+                '<div class="tactical-checkbox">' + (opts.done ? '✓' : '') + '</div>' +
+                '<div>' +
+                  '<p class="check-title">' + escapeHtml(opts.title) + '</p>' +
+                  '<div class="check-meta">' + escapeHtml(opts.sub) + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<button type="button" class="icon-btn-sm" data-action="delete-item" data-kind="' + escapeHtml(opts.kind) + '" data-id="' + escapeHtml(opts.id) + '">×</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderProjects() {
+        var tag = byId('focusLoggedTag');
+        var box = byId('projectsTaskList');
+        if (tag) tag.textContent = state.focusMinutesLogged + ' min logged';
+        if (box) {
+          box.innerHTML = state.projects.map(function (p) {
+            return buildSwipeCheckRow({ kind: 'proj', id: p.id, title: p.title, sub: p.track, done: p.done });
+          }).join('');
+        }
+      }
+
+      function renderPlants() {
+        var doneCount = state.plants.filter(function (p) { return p.done; }).length;
+        var tag = byId('plantsCountTag');
+        var box = byId('plantChecklistContainer');
+        if (tag) tag.textContent = doneCount + ' / ' + state.plants.length;
+        if (box) {
+          box.innerHTML = state.plants.map(function (pl) {
+            return buildSwipeCheckRow({ kind: 'plant', id: pl.id, title: pl.name, sub: 'Saturday Plant Care', done: pl.done });
+          }).join('');
+        }
+      }
+
+      function renderErrands() {
+        var openCount = state.errands.filter(function (e) { return !e.done; }).length;
+        var tag = byId('errandsCountTag');
+        var box = byId('errandsListContainer');
+        if (tag) tag.textContent = openCount + ' open';
+        if (box) {
+          box.innerHTML = state.errands.map(function (err) {
+            return buildSwipeCheckRow({ kind: 'errand', id: err.id, title: err.title, sub: err.tag || 'Personal', done: err.done });
+          }).join('');
+        }
+      }
+
+      function renderAll() {
+        try { applyThemeAndHeader(); } catch (e) {}
+        try { renderLiveCountdown(); } catch (e) {}
+        try { renderAccordions(); } catch (e) {}
+        try { render24HourGraph(); } catch (e) {}
+        try { renderTimeline(); } catch (e) {}
+        try { renderWorkouts(); } catch (e) {}
+        try { renderProjects(); } catch (e) {}
+        try { renderPlants(); } catch (e) {}
+        try { renderErrands(); } catch (e) {}
+      }
+
+      /* =======================================================================
+         FOCUS TIMER
+         ======================================================================= */
+      function updateTimerDisplay() {
+        var el = byId('focusTimerDisplay');
+        if (!el) return;
+        var m = Math.floor(timerSeconds / 60);
+        var s = timerSeconds % 60;
+        el.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      }
+
+      function stopTimerInterval() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        var btn = byId('timerStartPauseBtn');
+        if (btn) btn.textContent = 'Start';
+      }
+
+      /* =======================================================================
+         GLOBAL COMMAND CONTROLLER (Used by both document delegation & window.KeithCmd)
+         ======================================================================= */
+      window.KeithCmd = {
+        toggleWeek: function () {
+          state.weekType = state.weekType === 'A' ? 'B' : 'A';
+          saveState();
+          renderAll();
+        },
+        togglePeak: function () {
+          state.peakSeason = !state.peakSeason;
+          saveState();
+          renderAll();
+        },
+        toggleHud: function () {
+          state.hudEmbedMode = !state.hudEmbedMode;
+          saveState();
+          applyThemeAndHeader();
+        },
+        toggleAccordion: function (key) {
+          if (!key) return;
+          state.collapsedSections[key] = !state.collapsedSections[key];
+          saveState();
+          renderAccordions();
+        },
+        selectDay: function (idx) {
+          var nextIdx = Number(idx);
+          if (isNaN(nextIdx)) return;
+          if (nextIdx !== state.selectedDayIndex) {
+            lastSlideDirection = nextIdx > state.selectedDayIndex ? 'next' : 'prev';
+            state.selectedDayIndex = nextIdx;
+            saveState();
+            renderTimeline();
+            render24HourGraph();
+          }
+        },
+        prevDay: function () {
+          KeithCmd.selectDay((state.selectedDayIndex + 6) % 7);
+        },
+        nextDay: function () {
+          KeithCmd.selectDay((state.selectedDayIndex + 1) % 7);
+        },
+        toggleFullWeek: function () {
+          state.fullWeekView = !state.fullWeekView;
+          saveState();
+          renderTimeline();
+        },
+        logWorkout: function (label) {
+          var dayName = DAYS[new Date().getDay()];
+          state.workouts.push({ label: label || 'Workout Session', day: dayName });
+          saveState();
+          renderWorkouts();
+          showToast('Logged "' + (label || 'Workout Session') + '" (' + state.workouts.length + '/3 this week)!');
+          speak('Workout logged. ' + state.workouts.length + ' of 3 sessions complete this week.', false);
+        },
+        deleteWorkout: function (idx) {
+          state.workouts.splice(Number(idx), 1);
+          saveState();
+          renderWorkouts();
+        },
+        undoLastWorkout: function () {
+          if (state.workouts.length === 0) return;
+          state.workouts.pop();
+          saveState();
+          renderWorkouts();
+          showToast('Removed last workout entry.');
+        },
+        resetWorkouts: function () {
+          state.workouts = [];
+          saveState();
+          renderWorkouts();
+          showToast('Weekly workout counter reset.');
+        },
+        setTimerMins: function (mins) {
+          stopTimerInterval();
+          timerSelectedMins = Number(mins) || 25;
+          timerSeconds = timerSelectedMins * 60;
+          updateTimerDisplay();
+        },
+        toggleTimer: function () {
+          if (timerInterval) {
+            stopTimerInterval();
+            return;
+          }
+          var btn = byId('timerStartPauseBtn');
+          if (btn) btn.textContent = 'Pause';
+          timerInterval = setInterval(function () {
+            if (timerSeconds > 0) {
+              timerSeconds--;
+              updateTimerDisplay();
+            } else {
+              stopTimerInterval();
+              state.focusMinutesLogged += timerSelectedMins;
+              timerSeconds = timerSelectedMins * 60;
+              updateTimerDisplay();
+              saveState();
+              renderProjects();
+              showToast('Focus block complete! +' + timerSelectedMins + ' mins logged.');
+              speak('Focus block complete. ' + timerSelectedMins + ' minutes logged toward your projects.', false);
+            }
+          }, 1000);
+        },
+        resetTimer: function () {
+          stopTimerInterval();
+          timerSeconds = timerSelectedMins * 60;
+          updateTimerDisplay();
+        },
+        inlineAddProject: function () {
+          var inp = byId('inlineProjectInput');
+          if (!inp) return;
+          var val = inp.value.trim();
+          if (!val) return;
+          state.projects.unshift({ id: 'proj-' + Date.now(), title: val, track: 'OSHA / Web Build', done: false });
+          inp.value = '';
+          saveState();
+          renderProjects();
+          showToast('Added "' + val + '"');
+        },
+        toggleItem: function (kind, id) {
+          if (kind === 'proj') {
+            var p = state.projects.find(function (x) { return x.id === id; });
+            if (p) {
+              p.done = !p.done;
+              saveState();
+              renderProjects();
+              if (p.done) speak('Completed: ' + p.title + '.', false);
+            }
+          } else if (kind === 'plant') {
+            var pl = state.plants.find(function (x) { return x.id === id; });
+            if (pl) {
+              pl.done = !pl.done;
+              saveState();
+              renderPlants();
+              var doneCount = state.plants.filter(function (x) { return x.done; }).length;
+              if (pl.done && doneCount === state.plants.length) {
+                speak('All Saturday plant watering tasks are complete.', false);
+              }
+            }
+          } else if (kind === 'errand') {
+            var er = state.errands.find(function (x) { return x.id === id; });
+            if (er) {
+              er.done = !er.done;
+              saveState();
+              renderErrands();
+            }
+          }
+        },
+        deleteItem: function (kind, id) {
+          if (kind === 'proj') {
+            state.projects = state.projects.filter(function (x) { return x.id !== id; });
+            saveState(); renderProjects();
+          } else if (kind === 'plant') {
+            state.plants = state.plants.filter(function (x) { return x.id !== id; });
+            saveState(); renderPlants();
+          } else if (kind === 'errand') {
+            state.errands = state.errands.filter(function (x) { return x.id !== id; });
+            saveState(); renderErrands();
+          }
+        },
+        resetPlants: function () {
+          state.plants.forEach(function (p) { p.done = false; });
+          saveState();
+          renderPlants();
+          showToast('Saturday plant checklist reset.');
+        },
+        briefMe: function () {
+          speak(buildLiveBriefing(), true);
+        },
+        testAudio: function () {
+          speak('Audio check online Keith. JARVIS voice systems are responsive.', true);
+        },
+        stopAudio: function () {
+          stopAudio();
+        },
+        toggleListen: function () {
+          if (!SpeechRecCtor) {
+            showToast('Microphone voice recognition is unavailable in this browser — use Brief Me instead.');
+            return;
+          }
+          if (isListening && recognition) {
+            try { recognition.stop(); } catch (e) {}
+            return;
+          }
+          try {
+            recognition = new SpeechRecCtor();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            var btn = byId('jarvisListenBtn');
+            recognition.onstart = function () {
+              isListening = true;
+              if (btn) {
+                btn.className = 'pill-btn is-danger-soft';
+                btn.textContent = '🔴 Listening...';
+              }
+              setJarvisStatus('JARVIS // LISTENING...', 'listening');
+            };
+            recognition.onresult = function (ev) {
+              var t = ev.results[0][0].transcript;
+              processVoiceCommand(t);
+            };
+            recognition.onerror = function (ev) {
+              isListening = false;
+              if (btn) {
+                btn.className = 'pill-btn is-secondary-soft';
+                btn.textContent = '🎤 Listen';
+              }
+              setJarvisStatus('JARVIS VOICE // STANDBY', 'idle');
+              showToast('Microphone unavailable or blocked (' + (ev && ev.error ? ev.error : 'permission') + ').');
+            };
+            recognition.onend = function () {
+              isListening = false;
+              if (btn) {
+                btn.className = 'pill-btn is-secondary-soft';
+                btn.textContent = '🎤 Listen';
+              }
+              setJarvisStatus('JARVIS VOICE // STANDBY', 'idle');
+            };
+            recognition.start();
+          } catch (e) {
+            showToast('Could not start microphone in this browser.');
+          }
+        },
+        toggleCheckIns: function () {
+          state.voiceCheckIns = !state.voiceCheckIns;
+          saveState();
+          applyThemeAndHeader();
+          if (state.voiceCheckIns) {
+            speak('Automatic check-ins enabled.', true);
+          }
+        },
+        toggleVoiceSettings: function () {
+          var dr = byId('voiceSettingsDrawer');
+          if (dr) {
+            dr.classList.toggle('is-open');
+            syncVoiceDrawerUI();
+          }
+        },
+        changeVoiceProvider: function (val) {
+          state.voiceProvider = val;
+          saveState();
+          syncVoiceDrawerUI();
+        },
+        changeBrowserVoice: function (uri) {
+          state.preferredVoiceURI = uri;
+          saveState();
+          updateVoiceDiag();
+        },
+        toggleUkFilter: function (checked) {
+          state.ukFilterOnly = Boolean(checked);
+          saveState();
+          populateBrowserVoices();
+        },
+        updateRate: function (val) {
+          state.voiceRate = Number(val);
+          var lbl = byId('voiceRateLabel');
+          if (lbl) lbl.textContent = state.voiceRate.toFixed(2) + 'x';
+          saveState();
+          updateVoiceDiag();
+        },
+        updatePitch: function (val) {
+          state.voicePitch = Number(val);
+          var lbl = byId('voicePitchLabel');
+          if (lbl) lbl.textContent = state.voicePitch.toFixed(2);
+          saveState();
+          updateVoiceDiag();
+        },
+        saveNeuralCfg: function () {
+          var kIn = byId('neuralApiKeyInput');
+          var vIn = byId('neuralVoiceIdInput');
+          neuralCfg.apiKey = kIn ? kIn.value.trim() : '';
+          neuralCfg.voiceId = vIn ? vIn.value.trim() : 'onyx';
+          saveNeuralCfg();
+          updateVoiceDiag();
+          showToast('Neural voice settings saved locally.');
+        },
+        testNeuralVoice: function () {
+          KeithCmd.saveNeuralCfg();
+          speak('Neural voice calibration verified Keith. Systems nominal.', true);
+        },
+        openQuickAdd: function () {
+          var m = byId('quickAddModal');
+          if (m) m.classList.add('is-open');
+          var daySel = byId('qaDaySelect');
+          if (daySel) daySel.value = String(state.selectedDayIndex);
+          var dom = byId('qaDomain');
+          if (dom) KeithCmd.onQuickAddDomainChange(dom.value);
+          var inp = byId('qaTitle');
+          if (inp) inp.focus();
+        },
+        openTimeBlockModal: function () {
+          var dom = byId('qaDomain');
+          if (dom) dom.value = 'timeblock';
+          KeithCmd.openQuickAdd();
+        },
+        onQuickAddDomainChange: function (val) {
+          var box = byId('qaTimeBlockFields');
+          if (box) box.style.display = val === 'timeblock' ? 'grid' : 'none';
+        },
+        closeQuickAdd: function () {
+          var m = byId('quickAddModal');
+          if (m) m.classList.remove('is-open');
+        },
+        submitQuickAdd: function (e) {
+          if (e) e.preventDefault();
+          var domain = byId('qaDomain').value;
+          var title = byId('qaTitle').value.trim();
+          var sub = byId('qaSub').value.trim();
+          if (!title) return;
+
+          if (domain === 'timeblock') {
+            var dayIdx = Number(byId('qaDaySelect').value);
+            var startStr = byId('qaStartTime').value || '18:30';
+            var parts = startStr.split(':').map(Number);
+            var startMins = (parts[0] || 0) * 60 + (parts[1] || 0);
+            var durMins = Number(byId('qaDurationMins').value) || 60;
+            var cat = byId('qaTrackCat').value || 'Personal';
+            var newId = 'tb-' + Date.now();
+            state.customTimeBlocks.push({
+              id: newId,
+              dayIdx: dayIdx,
+              startMins: startMins,
+              durationMins: durMins,
+              title: title,
+              category: cat
+            });
+            state.selectedDayIndex = dayIdx;
+            selectedBlockId = newId;
+          } else if (domain === 'workout') {
+            KeithCmd.logWorkout(title);
+          } else if (domain === 'plants') {
+            state.plants.push({ id: 'pl-' + Date.now(), name: title, done: false });
+          } else if (domain === 'errands') {
+            state.errands.unshift({ id: 'err-' + Date.now(), title: title, tag: sub || 'Personal', done: false });
+          } else {
+            state.projects.unshift({ id: 'proj-' + Date.now(), title: title, track: sub || 'OSHA / Web Build', done: false });
+          }
+
+          var form = byId('quickAddForm');
+          if (form) form.reset();
+          KeithCmd.closeQuickAdd();
+          saveState();
+          renderAll();
+          if (domain !== 'workout') showToast('Added "' + title + '" to The Agenda!');
+        },
+        deleteTimeBlock: function (id) {
+          state.customTimeBlocks = state.customTimeBlocks.filter(function (tb) { return tb.id !== id; });
+          if (selectedBlockId === id) selectedBlockId = null;
+          saveState();
+          renderLiveCountdown();
+          render24HourGraph();
+          showToast('Removed time-block from 24-hour chronometer.');
+        },
+        inspectTimeBlock: function (id) {
+          selectedBlockId = id || null;
+          render24HourGraph();
+        },
+        quickAddPresetBlock: function (title, durMins, cat) {
+          var dIdx = state.selectedDayIndex;
+          var now = new Date();
+          var startMins = (now.getDay() === dIdx)
+            ? Math.min(23 * 60, Math.ceil((now.getHours() * 60 + now.getMinutes() + 15) / 15) * 15)
+            : (dIdx === 4 ? (14 * 60 + 30) : (18 * 60 + 30));
+          var newId = 'tb-' + Date.now();
+          state.customTimeBlocks.push({
+            id: newId,
+            dayIdx: dIdx,
+            startMins: startMins,
+            durationMins: Number(durMins) || 60,
+            title: title,
+            category: cat
+          });
+          selectedBlockId = newId;
+          saveState();
+          renderLiveCountdown();
+          render24HourGraph();
+          showToast('Added ' + title + ' (' + formatDur(durMins) + ') at ' + minsToTimeStr(startMins) + '!');
+        },
+        openThemeModal: function () {
+          var m = byId('themeSettingsModal');
+          if (m) m.classList.add('is-open');
+        },
+        closeThemeModal: function () {
+          var m = byId('themeSettingsModal');
+          if (m) m.classList.remove('is-open');
+        },
+        setTheme: function (key) {
+          state.themeKey = key;
+          saveState();
+          applyThemeAndHeader();
+        },
+        startNewWeek: function () {
+          state.workouts = [];
+          state.focusMinutesLogged = 0;
+          state.plants.forEach(function (p) { p.done = false; });
+          state.weekType = state.weekType === 'A' ? 'B' : 'A';
+          saveState();
+          renderAll();
+          KeithCmd.closeThemeModal();
+          showToast('New week started! Flipped to Week ' + state.weekType + ' and reset weekly counters.');
+        },
+        exportIcs: function () {
+          var events = [
+            { summary: 'Pick Up Kids (Wed 6:00 PM)', date: '20261125', start: '180000', end: '183000', rrule: 'FREQ=WEEKLY;INTERVAL=1' },
+            { summary: 'School Drop-Off (Older 2 Kids)', date: '20261126', start: '073000', end: '075000', rrule: 'FREQ=WEEKLY;BYDAY=TH,FR' },
+            { summary: 'Bus Drop-Off (Youngest)', date: '20261126', start: '083000', end: '084500', rrule: 'FREQ=WEEKLY;BYDAY=TH,FR' },
+            { summary: 'School Pick-Up (Older 2 Kids)', date: '20261126', start: '153000', end: '155000', rrule: 'FREQ=WEEKLY;BYDAY=TH' },
+            { summary: 'Bus Stop Pick-Up (Youngest)', date: '20261126', start: '163000', end: '164500', rrule: 'FREQ=WEEKLY;BYDAY=TH' },
+            { summary: 'Friday School Pick-Up (Alternating Week A)', date: '20261127', start: '153000', end: '155000', rrule: 'FREQ=WEEKLY;INTERVAL=2' },
+            { summary: 'Friday Bus Pick-Up (Alternating Week A)', date: '20261127', start: '163000', end: '164500', rrule: 'FREQ=WEEKLY;INTERVAL=2' },
+            { summary: 'Drop Off Kids to Mom (Sat 8:00 PM)', date: '20261128', start: '200000', end: '203000', rrule: 'FREQ=WEEKLY;INTERVAL=2' },
+            { summary: 'Saturday Plant Watering Ritual', date: '20261128', start: '100000', end: '103000', rrule: 'FREQ=WEEKLY;INTERVAL=1' }
+          ];
+          var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//The Agenda//EN', 'CALSCALE:GREGORIAN'];
+          events.forEach(function (ev, i) {
+            lines.push(
+              'BEGIN:VEVENT',
+              'UID:keith-custody-' + i + '@the-agenda',
+              'DTSTAMP:20261121T230000Z',
+              'DTSTART:' + ev.date + 'T' + ev.start,
+              'DTEND:' + ev.date + 'T' + ev.end,
+              'RRULE:' + ev.rrule,
+              'SUMMARY:' + ev.summary,
+              'BEGIN:VALARM',
+              'TRIGGER:-PT15M',
+              'ACTION:DISPLAY',
+              'DESCRIPTION:In 15 min: ' + ev.summary,
+              'END:VALARM',
+              'END:VEVENT'
+            );
+          });
+          lines.push('END:VCALENDAR');
+          var blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'the-agenda-school-custody-alerts.ics';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('School & custody alerts (.ics) downloaded!');
+        },
+        hideToast: hideToast
+      };
+
+      /* =======================================================================
+         DOCUMENT-LEVEL EVENT DELEGATION (100% Reliable Click, Change, Input, Submit)
+         ======================================================================= */
+      function initDelegatedListeners() {
+        document.addEventListener('click', function (e) {
+          try {
+            var target = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
+            if (!target) return;
+            var act = target.getAttribute('data-action');
+
+            if (act === 'backdrop-close-qa') {
+              if (e.target === target) KeithCmd.closeQuickAdd();
+              return;
+            }
+            if (act === 'backdrop-close-theme') {
+              if (e.target === target) KeithCmd.closeThemeModal();
+              return;
+            }
+
+            switch (act) {
+              case 'export-ics': KeithCmd.exportIcs(); break;
+              case 'toggle-week': KeithCmd.toggleWeek(); break;
+              case 'toggle-peak': KeithCmd.togglePeak(); break;
+              case 'open-theme-modal': KeithCmd.openThemeModal(); break;
+              case 'close-theme-modal': KeithCmd.closeThemeModal(); break;
+              case 'toggle-hud': KeithCmd.toggleHud(); break;
+              case 'brief-me': KeithCmd.briefMe(); break;
+              case 'test-audio': KeithCmd.testAudio(); break;
+              case 'stop-audio': KeithCmd.stopAudio(); break;
+              case 'toggle-listen': KeithCmd.toggleListen(); break;
+              case 'toggle-checkins': KeithCmd.toggleCheckIns(); break;
+              case 'toggle-voice-settings': KeithCmd.toggleVoiceSettings(); break;
+              case 'save-neural-cfg': KeithCmd.saveNeuralCfg(); break;
+              case 'test-neural-voice': KeithCmd.testNeuralVoice(); break;
+              case 'hide-toast': KeithCmd.hideToast(); break;
+              case 'toggle-accordion': KeithCmd.toggleAccordion(target.getAttribute('data-key')); break;
+              case 'open-timeblock-modal': KeithCmd.openTimeBlockModal(); break;
+              case 'preset-block':
+                KeithCmd.quickAddPresetBlock(
+                  target.getAttribute('data-title'),
+                  Number(target.getAttribute('data-dur')),
+                  target.getAttribute('data-cat')
+                );
+                break;
+              case 'inspect-block':
+                KeithCmd.inspectTimeBlock(target.getAttribute('data-block-id'));
+                break;
+              case 'clear-inspect':
+                KeithCmd.inspectTimeBlock(null);
+                break;
+              case 'delete-block':
+                KeithCmd.deleteTimeBlock(target.getAttribute('data-block-id'));
+                break;
+              case 'select-day':
+                KeithCmd.selectDay(Number(target.getAttribute('data-day')));
+                break;
+              case 'prev-day': KeithCmd.prevDay(); break;
+              case 'next-day': KeithCmd.nextDay(); break;
+              case 'toggle-full-week': KeithCmd.toggleFullWeek(); break;
+              case 'undo-workout': KeithCmd.undoLastWorkout(); break;
+              case 'reset-workouts': KeithCmd.resetWorkouts(); break;
+              case 'log-workout': KeithCmd.logWorkout(target.getAttribute('data-label')); break;
+              case 'delete-workout': KeithCmd.deleteWorkout(Number(target.getAttribute('data-idx'))); break;
+              case 'set-timer': KeithCmd.setTimerMins(Number(target.getAttribute('data-mins'))); break;
+              case 'toggle-timer': KeithCmd.toggleTimer(); break;
+              case 'reset-timer': KeithCmd.resetTimer(); break;
+              case 'inline-add-project': KeithCmd.inlineAddProject(); break;
+              case 'toggle-item':
+                KeithCmd.toggleItem(target.getAttribute('data-kind'), target.getAttribute('data-id'));
+                break;
+              case 'delete-item':
+                KeithCmd.deleteItem(target.getAttribute('data-kind'), target.getAttribute('data-id'));
+                break;
+              case 'reset-plants': KeithCmd.resetPlants(); break;
+              case 'open-quick-add': KeithCmd.openQuickAdd(); break;
+              case 'close-quick-add': KeithCmd.closeQuickAdd(); break;
+              case 'set-theme': KeithCmd.setTheme(target.getAttribute('data-theme')); break;
+              case 'start-new-week': KeithCmd.startNewWeek(); break;
+            }
+          } catch (err) {}
+        });
+
+        document.addEventListener('change', function (e) {
+          try {
+            var target = e.target && e.target.closest ? e.target.closest('[data-change]') : null;
+            if (!target) return;
+            var ch = target.getAttribute('data-change');
+            if (ch === 'voice-provider') KeithCmd.changeVoiceProvider(target.value);
+            else if (ch === 'browser-voice') KeithCmd.changeBrowserVoice(target.value);
+            else if (ch === 'uk-filter') KeithCmd.toggleUkFilter(target.checked);
+            else if (ch === 'qa-domain') KeithCmd.onQuickAddDomainChange(target.value);
+          } catch (err) {}
+        });
+
+        document.addEventListener('input', function (e) {
+          try {
+            var target = e.target && e.target.closest ? e.target.closest('[data-input]') : null;
+            if (!target) return;
+            var inp = target.getAttribute('data-input');
+            if (inp === 'voice-rate') KeithCmd.updateRate(target.value);
+            else if (inp === 'voice-pitch') KeithCmd.updatePitch(target.value);
+          } catch (err) {}
+        });
+
+        document.addEventListener('submit', function (e) {
+          if (e.target && e.target.id === 'quickAddForm') {
+            KeithCmd.submitQuickAdd(e);
+          }
+        });
+
+        var inlineInp = byId('inlineProjectInput');
+        if (inlineInp) {
+          inlineInp.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              KeithCmd.inlineAddProject();
+            }
+          });
+        }
+      }
+
+      /* =======================================================================
+         TOUCH SWIPE GESTURES (Day Carousel + Swipe-Right-to-Complete Tasks)
+         ======================================================================= */
+      function initTouchGestures() {
+        try {
+          var viewport = byId('scheduleSwipeViewport');
+          var startX = 0;
+          var startY = 0;
+          if (viewport) {
+            viewport.addEventListener('touchstart', function (e) {
+              if (state.fullWeekView || !e.touches || !e.touches[0]) return;
+              startX = e.touches[0].clientX;
+              startY = e.touches[0].clientY;
+            }, { passive: true });
+
+            viewport.addEventListener('touchend', function (e) {
+              if (state.fullWeekView || !e.changedTouches || !e.changedTouches[0]) return;
+              var dx = e.changedTouches[0].clientX - startX;
+              var dy = e.changedTouches[0].clientY - startY;
+              if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+                if (dx < 0) KeithCmd.nextDay();
+                else KeithCmd.prevDay();
+              }
+            }, { passive: true });
+          }
+
+          var mainEl = document.querySelector('main');
+          var activeRow = null;
+          var rStartX = 0;
+          var rStartY = 0;
+          var rDelta = 0;
+
+          if (mainEl) {
+            mainEl.addEventListener('touchstart', function (e) {
+              var row = e.target && e.target.closest ? e.target.closest('.check-row') : null;
+              if (!row || !e.touches || !e.touches[0]) return;
+              activeRow = row;
+              rStartX = e.touches[0].clientX;
+              rStartY = e.touches[0].clientY;
+              rDelta = 0;
+              activeRow.style.transition = 'none';
+            }, { passive: true });
+
+            mainEl.addEventListener('touchmove', function (e) {
+              if (!activeRow || !e.touches || !e.touches[0]) return;
+              var dx = e.touches[0].clientX - rStartX;
+              var dy = e.touches[0].clientY - rStartY;
+              if (dx > 8 && Math.abs(dx) > Math.abs(dy)) {
+                rDelta = Math.min(dx, 92);
+                activeRow.style.transform = 'translateX(' + rDelta + 'px)';
+              }
+            }, { passive: true });
+
+            mainEl.addEventListener('touchend', function () {
+              if (!activeRow) return;
+              var row = activeRow;
+              activeRow = null;
+              row.style.transition = 'transform 0.22s ease';
+              row.style.transform = 'translateX(0)';
+              if (rDelta >= 56) {
+                KeithCmd.toggleItem(row.getAttribute('data-kind'), row.getAttribute('data-id'));
+              }
+              rDelta = 0;
+            }, { passive: true });
+          }
+        } catch (e) {}
+      }
+
+      /* =======================================================================
+         15-MINUTE AUTOMATIC TRANSITION CHECK-INS
+         ======================================================================= */
+      function checkMilestones() {
+        try {
+          if (!state.voiceCheckIns) return;
+          var now = new Date();
+          var d = now.getDay();
+          var hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+          var stamp = d + '-' + hhmm;
+          if (stamp === lastAnnouncedMilestone) return;
+
+          var cue = null;
+          if ((d === 4 || d === 5) && hhmm === '07:15') {
+            cue = 'Heads up Keith: 15 minutes until 7:30 AM school drop-off for the older two kids.';
+          } else if ((d === 4 || d === 5) && hhmm === '08:15') {
+            cue = '15 minutes until 8:30 AM bus drop-off for the youngest.';
+          } else if (d === 3 && hhmm === '17:45') {
+            cue = '15 minutes until 6:00 PM kids pickup.';
+          } else if ((d === 4 || (d === 5 && state.weekType === 'A')) && hhmm === '15:15') {
+            cue = '15 minutes until 3:30 PM school pickup.';
+          } else if (d === 6 && state.weekType === 'A' && hhmm === '19:45') {
+            cue = '15 minutes until 8:00 PM kids drop-off to their mom.';
+          }
+
+          if (cue) {
+            lastAnnouncedMilestone = stamp;
+            speak(cue, false);
+          }
+        } catch (e) {}
+      }
+
+      /* =======================================================================
+         BOOT & JS HEALTH VERIFICATION
+         ======================================================================= */
+      function boot() {
+        initDelegatedListeners();
+        renderAll();
+        syncVoiceDrawerUI();
+        initTouchGestures();
+
+        if ('speechSynthesis' in window) {
+          populateBrowserVoices();
+          window.speechSynthesis.onvoiceschanged = populateBrowserVoices;
+        }
+
+        setInterval(function () {
+          checkMilestones();
+          renderLiveCountdown();
+          render24HourGraph();
+        }, 30000);
+
+        var healthText = byId('jsHealthText');
+        if (healthText) healthText.textContent = 'JS ONLINE';
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+</body>
+</html>
